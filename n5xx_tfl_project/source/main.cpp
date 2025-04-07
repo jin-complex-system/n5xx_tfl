@@ -20,6 +20,7 @@
 #include "led.h"
 #include "inference.h"
 #include "input.h"
+#include "button.h"
 
 static constexpr
 uint32_t
@@ -33,6 +34,7 @@ OUTPUT_BUFFER[NUM_CLASSES] = {};
  * @brief   Application entry point.
  */
 int main(void) {
+    setup_button();
 
     /* Init board hardware. */
     BOARD_InitBootPins();
@@ -44,6 +46,7 @@ int main(void) {
 #endif
 
     setup_led();
+
     toggle_green_led();
 
     inference_setup();
@@ -52,6 +55,11 @@ int main(void) {
     PRINTF("Hello World\r\n");
 
     while(true) {
+    	/// Handle button
+    	if (check_button_result() > 0) {
+    		toggle_blue_led();
+    	}
+
     	/// Get prediction
     	inference_set_input(
     			INPUT_ARRAY,

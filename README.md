@@ -30,8 +30,8 @@ This project is intended to test the conversion step of TensorFlow models on the
    - Middleware > Memories > SDMMC Stack > sdmmc_host_usdhc
 6. Click on 'Finish'
 7. Copy over source files to `<project_name>/source`
-8. Copy over `ffconf.h` and `ffconf_gen.h` from `<project_name>/source/ into `fatfs/source/.`
-9. Change line 65 in `<project_name>/sdmmc/template/usdhc` to `#define BOARD_SDMMC_SD_IO_VOLTAGE_CONTROL_TYPE kSD_IOVoltageCtrlNotSupport`
+8. Copy over `ffconf.h` and `ffconf_gen.h` from `<project_name>/source/. into `fatfs/source/.`
+9. Change line 65 in `<project_name>/sdmmc/template/usdhc` to `#define BOARD_SDMMC_SD_IO_VOLTAGE_CONTROL_TYPE kSD_IOVoltageCtrlByGpio`
 
 # How to Test New TensorFlow Lite Models
 1. Convert your TensorFlow models (`.h5`) using eIQ Portal and command line

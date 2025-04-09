@@ -22,6 +22,10 @@
 #include "input.h"
 #include "button.h"
 
+#include <sd_card/sd_card.h>
+#include <cstring>
+#include <string>
+
 static constexpr
 uint32_t
 NUM_CLASSES = 10;
@@ -29,6 +33,12 @@ NUM_CLASSES = 10;
 float
 OUTPUT_BUFFER[NUM_CLASSES] = {};
 
+const std::string
+OUTPUT_FILENAME = "my_results.txt";
+const std::string
+OUTPUT_DIRECTORY = "my_results_dir";
+constexpr bool
+OVERWRITE_FILE_IS_OKAY = true;
 
 /*
  * @brief   Application entry point.
@@ -46,6 +56,10 @@ int main(void) {
 #endif
 
     setup_led();
+
+    const bool sd_card_success =
+	sd_card_setup();
+    assert(sd_card_success);
 
     toggle_green_led();
 
@@ -81,6 +95,29 @@ int main(void) {
 
     	}
     	assert(best_score >= 0.0f and best_class_id < NUM_CLASSES);
+
+    	/// Store results into a buffer
+    	std::string output_buffer(100, 0);
+		sprintf(
+				output_buffer.data(),
+				"id=%lu score=%.5f\r\n",
+				best_class_id,
+				best_score);
+		output_buffer.shrink_to_fit();
+    	PRINTF("%s\r\n", output_buffer.data());
+
+    	/// Export results to SD card
+    	const bool sd_result =
+    	sd_card_write_to_file(
+			OUTPUT_FILENAME.data(),
+			OUTPUT_FILENAME.length(),
+			OUTPUT_DIRECTORY.data(),
+			OUTPUT_DIRECTORY.length(),
+			output_buffer.data(),
+			output_buffer.length(),
+			OVERWRITE_FILE_IS_OKAY
+		);
+    	assert(sd_result);
 
     	/// Toggle red LED
     	toggle_red_led();

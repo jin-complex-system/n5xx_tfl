@@ -3,7 +3,6 @@
 #include "board.h"
 #include <assert.h>
 #include "fsl_gpio.h"
-#include "pin_mux.h"
 
 #define BOARD_SW_GPIO        BOARD_SW3_GPIO
 #define BOARD_SW_PORT        BOARD_SW3_PORT
@@ -24,10 +23,6 @@ button_result = 0;
 
 void
 setup_button(void) {
-	BOARD_InitBUTTONsPins();
-
-	CLOCK_EnableClock(kCLOCK_Gpio0);
-
 	GPIO_SetPinInterruptConfig(
 			BOARD_SW2_GPIO,
 			BOARD_SW2_GPIO_PIN,

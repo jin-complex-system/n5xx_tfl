@@ -5,9 +5,6 @@
 
 void
 setup_led() {
-	BOARD_InitLEDsPins();
-	CLOCK_EnableClock(kCLOCK_Gpio3);
-
     LED_RED_INIT(LOGIC_LED_OFF);
     LED_GREEN_INIT(LOGIC_LED_OFF);
     LED_BLUE_INIT(LOGIC_LED_OFF);

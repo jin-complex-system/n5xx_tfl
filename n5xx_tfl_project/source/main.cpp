@@ -40,23 +40,46 @@ OUTPUT_DIRECTORY = "my_results_dir";
 constexpr bool
 OVERWRITE_FILE_IS_OKAY = true;
 
+static
+void BOARD_InitHardware(void) {
+	/* attach FRO 12M to FLEXCOMM4 (debug console) */
+	CLOCK_SetClkDiv(kCLOCK_DivFlexcom4Clk, 1u);
+	CLOCK_AttachClk(BOARD_DEBUG_UART_CLK_ATTACH);
+
+	/* attach FRO HF to USDHC */
+	CLOCK_SetClkDiv(kCLOCK_DivUSdhcClk, 1u);
+	CLOCK_AttachClk(kFRO_HF_to_USDHC);
+
+	CLOCK_EnableClock(kCLOCK_Gpio0);
+	CLOCK_EnableClock(kCLOCK_Gpio2);
+	CLOCK_EnableClock(kCLOCK_Gpio3);
+
+	// TODO: Add SD card related pin configuration
+
+	BOARD_InitBootPins();
+	BOARD_InitBootClocks();
+	BOARD_InitBootPeripherals();
+
+#ifndef BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL
+	/* Init FSL debug console. */
+	BOARD_InitDebugConsole();
+#endif
+
+	BOARD_InitBUTTONsPins();
+	BOARD_InitLEDsPins();
+}
+
 /*
  * @brief   Application entry point.
  */
 int main(void) {
 	 bool sd_card_success;
 
-    setup_button();
-
     /* Init board hardware. */
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
-#ifndef BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL
-    /* Init FSL debug console. */
-    BOARD_InitDebugConsole();
-#endif
+	BOARD_InitHardware();
 
+	/// Setup modules
+	setup_button();
     setup_led();
 
     sd_card_success =

@@ -29,13 +29,15 @@ This project is intended to test the conversion step of TensorFlow models on the
    - Middleware > Memories > SDMMC Stack > sd
    - Middleware > Memories > SDMMC Stack > sdio
    - Middleware > Memories > SDMMC Stack > sdmmc_host_usdhc
+   - Middleware > Memories > SDMMC Stack > sdmmc_host_usdhc_non_blocking
+   - Middleware > Memories > SDMMC Stack > sdmmc_osa
+7. Remove the following components:
+   - Middleware > Memories > SDMMC Stack > sdmmc_host_usdhc_blocking
 6. Click on 'Finish'
 7. Copy over source files to `<project_name>/source`
 8. Copy over files from [`_copy_to_locations`](copy_to_locations) to various driver locations:
    - Copy [`_copy_to_locations/ffconf.h`](_copy_to_locations/ffconf.h) into `fatfs/source/`
    - Copy [`_copy_to_locations/ffconf_gen.h`](`_copy_to_locations/ffconf_gen.h`) into `sdmmc/template/usdhc`
-   - Copy and replace [`_copy_to_locations/sdmmc_config.h`](_copy_to_locations/sdmmc_config.h) into `fatfs/source/`
-   - Copy and replace [`_copy_to_locations/sdmmc_config.c`](_copy_to_locations/sdmmc_config.c) into `fatfs/source/`
 
 # How to Test New TensorFlow Lite Models
 1. Convert your TensorFlow models (`.h5`) using eIQ Portal and command line

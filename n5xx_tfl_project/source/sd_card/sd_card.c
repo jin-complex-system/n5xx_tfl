@@ -7,7 +7,7 @@
 #include <ff.h>
 #include <diskio.h>
 #include <fsl_sd_disk.h>
-#include <sdmmc_config.h>
+#include "sdmmc_config.h"
 #include <board.h>
 
 static
@@ -58,9 +58,6 @@ sdcardWaitCardInsert(void) {
 
 bool
 sd_card_setup(void) {
-    CLOCK_SetClkDiv(kCLOCK_DivUSdhcClk, 1u);
-    CLOCK_AttachClk(kFRO_HF_to_USDHC);
-
 	const TCHAR driverNumberBuffer[3U] = {SDDISK + '0', ':', '/'};
 	FRESULT error;
 

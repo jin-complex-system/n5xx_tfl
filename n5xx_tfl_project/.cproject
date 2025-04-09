@@ -79,6 +79,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa/config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdmmc/sdio}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/gpio}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/board}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template/sd}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template}&quot;"/>
@@ -205,6 +206,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa/config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdmmc/sdio}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/gpio}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/board}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template/sd}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template}&quot;"/>
@@ -305,6 +307,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa/config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdmmc/sdio}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/gpio}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template/sd}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template/mmc}&quot;"/>
@@ -553,6 +556,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa/config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdmmc/sdio}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/gpio}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/board}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template/sd}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template}&quot;"/>
@@ -676,6 +680,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa/config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdmmc/sdio}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/gpio}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/board}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template/sd}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template}&quot;"/>
@@ -773,6 +778,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa/config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/osa}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdmmc/sdio}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/gpio}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template/sd}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/template/mmc}&quot;"/>
@@ -969,7 +975,7 @@
 	<storageModule moduleId="com.nxp.mcuxpresso.core.datamodels">
 		<sdkName>SDK_2.x_MCX-N5XX-EVK</sdkName>
 		<sdkVersion>24.12.00</sdkVersion>
-		<sdkComponents>project_template.mcxn5xxevk.MCXN547;platform.drivers.lpflexcomm_lpuart.MCXN547;component.lpuart_adapter.MCXN547;utility.str.MCXN547;platform.devices.MCXN547_system.MCXN547;utility.debug_console.MCXN547;component.serial_manager_uart.MCXN547;component.lists.MCXN547;platform.drivers.gpio.MCXN547;platform.drivers.lpflexcomm_lpi2c.MCXN547;platform.drivers.lpflexcomm_lpspi.MCXN547;platform.drivers.mcx_spc.MCXN547;platform.drivers.common.MCXN547;device.MCXN547_startup.MCXN547;platform.drivers.port.MCXN547;platform.drivers.lpflexcomm.MCXN547;component.serial_manager.MCXN547;platform.utilities.assert.MCXN547;CMSIS_Include_core_cm.MCXN547;utility.debug_console_template_config.MCXN547;platform.drivers.reset.MCXN547;platform.drivers.clock.MCXN547;device.MCXN547_CMSIS.MCXN547;middleware.eiq.MCXN547;middleware.eiq.tensorflow_lite_micro.MCXN547;middleware.eiq.tensorflow_lite_micro.refenerce.MCXN547;middleware.eiq.tensorflow_lite_micro.source.MCXN547;middleware.eiq.tensorflow_lite_micro.debug_log.MCXN547;middleware.eiq.tensorflow_lite_micro.neutron.MCXN547;middleware.eiq.tensorflow_lite_micro.third_party.neutron_lib.binary.MCXN547;middleware.sdmmc.common.MCXN547;middleware.fatfs.MCXN547;middleware.fatfs.sd.MCXN547;middleware.fatfs.template_sd.MCXN547;middleware.sdmmc.sd.MCXN547;middleware.sdmmc.mmc.MCXN547;middleware.fatfs.mmc.MCXN547;middleware.fatfs.template_mmc.MCXN547;middleware.sdmmc.host.usdhc.MCXN547;component.osa.MCXN547;middleware.sdmmc.host.usdhc.polling.MCXN547;middleware.sdmmc.osa.freertos.MCXN547;component.osa_template_config.MCXN547;component.osa_interface.MCXN547;platform.drivers.usdhc.MCXN547;component.osa_bm.MCXN547;middleware.eiq.tensorflow_lite_micro.library.MCXN547;middleware.sdmmc.sdio.MCXN547;middleware.sdmmc.usdhc.template.MCXN547;</sdkComponents>
+		<sdkComponents>project_template.mcxn5xxevk.MCXN547;platform.drivers.lpflexcomm_lpuart.MCXN547;component.lpuart_adapter.MCXN547;utility.str.MCXN547;platform.devices.MCXN547_system.MCXN547;utility.debug_console.MCXN547;component.serial_manager_uart.MCXN547;component.lists.MCXN547;platform.drivers.gpio.MCXN547;platform.drivers.lpflexcomm_lpi2c.MCXN547;platform.drivers.lpflexcomm_lpspi.MCXN547;platform.drivers.mcx_spc.MCXN547;platform.drivers.common.MCXN547;device.MCXN547_startup.MCXN547;platform.drivers.port.MCXN547;platform.drivers.lpflexcomm.MCXN547;component.serial_manager.MCXN547;platform.utilities.assert.MCXN547;CMSIS_Include_core_cm.MCXN547;utility.debug_console_template_config.MCXN547;platform.drivers.reset.MCXN547;platform.drivers.clock.MCXN547;device.MCXN547_CMSIS.MCXN547;middleware.eiq.MCXN547;middleware.eiq.tensorflow_lite_micro.MCXN547;middleware.eiq.tensorflow_lite_micro.refenerce.MCXN547;middleware.eiq.tensorflow_lite_micro.source.MCXN547;middleware.eiq.tensorflow_lite_micro.debug_log.MCXN547;middleware.eiq.tensorflow_lite_micro.neutron.MCXN547;middleware.eiq.tensorflow_lite_micro.third_party.neutron_lib.binary.MCXN547;middleware.sdmmc.common.MCXN547;middleware.fatfs.MCXN547;middleware.fatfs.sd.MCXN547;middleware.fatfs.template_sd.MCXN547;middleware.sdmmc.sd.MCXN547;middleware.sdmmc.mmc.MCXN547;middleware.fatfs.mmc.MCXN547;middleware.fatfs.template_mmc.MCXN547;middleware.sdmmc.host.usdhc.MCXN547;component.osa.MCXN547;middleware.sdmmc.host.usdhc.polling.MCXN547;middleware.sdmmc.osa.freertos.MCXN547;component.osa_template_config.MCXN547;component.osa_interface.MCXN547;platform.drivers.usdhc.MCXN547;component.osa_bm.MCXN547;middleware.eiq.tensorflow_lite_micro.library.MCXN547;middleware.sdmmc.sdio.MCXN547;middleware.sdmmc.usdhc.template.MCXN547;component.gpio_adapter.MCXN547;</sdkComponents>
 		<boardId>mcxn5xxevk</boardId>
 		<package>MCXN547VDF</package>
 		<core>cm33</core>

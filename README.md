@@ -21,6 +21,7 @@ This project is intended to test the conversion step of TensorFlow models on the
     - Project Type: C++ Project
     - Project Options - SDK Debug: UART
 5. Add the following components:
+   - Abstraction > Device > SDK Drivers > gpio_adapter
    - Middleware > Machine Learning > eIQ
    - Middleware > Machine Learning > tensorflow_lite
    - Middleware > File System > FAT File System > sd
@@ -30,8 +31,11 @@ This project is intended to test the conversion step of TensorFlow models on the
    - Middleware > Memories > SDMMC Stack > sdmmc_host_usdhc
 6. Click on 'Finish'
 7. Copy over source files to `<project_name>/source`
-8. Copy over `ffconf.h` and `ffconf_gen.h` from `<project_name>/source/. into `fatfs/source/.`
-9. Change line 65 in `<project_name>/sdmmc/template/usdhc` to `#define BOARD_SDMMC_SD_IO_VOLTAGE_CONTROL_TYPE kSD_IOVoltageCtrlByGpio`
+8. Copy over files from [`_copy_to_locations`](copy_to_locations) to various driver locations:
+   - Copy [`_copy_to_locations/ffconf.h`](_copy_to_locations/ffconf.h) into `fatfs/source/`
+   - Copy [`_copy_to_locations/ffconf_gen.h`](`_copy_to_locations/ffconf_gen.h`) into `sdmmc/template/usdhc`
+   - Copy and replace [`_copy_to_locations/sdmmc_config.h`](_copy_to_locations/sdmmc_config.h) into `fatfs/source/`
+   - Copy and replace [`_copy_to_locations/sdmmc_config.c`](_copy_to_locations/sdmmc_config.c) into `fatfs/source/`
 
 # How to Test New TensorFlow Lite Models
 1. Convert your TensorFlow models (`.h5`) using eIQ Portal and command line

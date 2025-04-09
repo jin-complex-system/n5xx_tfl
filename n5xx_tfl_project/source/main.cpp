@@ -44,6 +44,8 @@ OVERWRITE_FILE_IS_OKAY = true;
  * @brief   Application entry point.
  */
 int main(void) {
+	 bool sd_card_success;
+
     setup_button();
 
     /* Init board hardware. */
@@ -57,9 +59,19 @@ int main(void) {
 
     setup_led();
 
-    const bool sd_card_success =
+    sd_card_success =
 	sd_card_setup();
     assert(sd_card_success);
+    PRINTF("Initialised SD card\r\n");
+
+    sd_card_success =
+    sd_card_create_directory(
+			OUTPUT_DIRECTORY.data(),
+			OUTPUT_DIRECTORY.length(),
+			true
+	);
+    assert(sd_card_success);
+    PRINTF("Created directory\r\n");
 
     toggle_green_led();
 

@@ -33,23 +33,21 @@ sdcardWaitCardInsert(void) {
 			NULL);
 
     /* SD host init function */
-    if (SD_HostInit(&g_sd) != kStatus_Success)
-    {
+    if (SD_HostInit(&g_sd) != kStatus_Success) {
         PRINTF("\r\nSD host init fail\r\n");
         return kStatus_Fail;
     }
 
     /* wait card insert */
-    if (SD_PollingCardInsert(&g_sd, kSD_Inserted) == kStatus_Success)
-    {
+    if (SD_PollingCardInsert(&g_sd, kSD_Inserted) == kStatus_Success) {
         PRINTF("\r\nCard inserted.\r\n");
+
         /* power off card */
         SD_SetCardPower(&g_sd, false);
         /* power on the card */
         SD_SetCardPower(&g_sd, true);
     }
-    else
-    {
+    else {
         PRINTF("\r\nCard detect fail.\r\n");
         return kStatus_Fail;
     }
@@ -66,7 +64,6 @@ sd_card_setup(void) {
 	const TCHAR driverNumberBuffer[3U] = {SDDISK + '0', ':', '/'};
 	FRESULT error;
 
-
 	if (sdcardWaitCardInsert() != kStatus_Success) {
 		if (!SD_IsCardPresent(&g_sd)) {
 			return false;
@@ -75,7 +72,7 @@ sd_card_setup(void) {
 
     if (f_mount(&g_fileSystem, driverNumberBuffer, 0U)) {
         PRINTF("Mount volume failed.\r\n");
-        return true;
+        return false;
     }
 
 #if (FF_FS_RPATH >= 2U)
@@ -87,9 +84,10 @@ sd_card_setup(void) {
 #endif
 
 #if FF_USE_MKFS
+	BYTE work[FF_MAX_SS];
+
     PRINTF("\r\nMake file system......The time may be long if the card capacity is big.\r\n");
-    if (f_mkfs(driverNumberBuffer, 0, work, sizeof work))
-    {
+    if (f_mkfs(driverNumberBuffer, 0, work, sizeof work)) {
         PRINTF("Make file system failed.\r\n");
         return false;
     }

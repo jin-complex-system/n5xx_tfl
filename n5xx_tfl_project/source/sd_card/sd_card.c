@@ -12,6 +12,7 @@
 #include <fsl_sd_disk.h>
 #include "sdmmc_config.h"
 #include <board.h>
+#include <stdio.h>
 
 static
 status_t
@@ -328,7 +329,8 @@ sd_card_create_directory(
 
 	// TODO: Create directory based on parameters
 
-    error = f_mkdir(_T("/dir_1"));
+    error = f_mkdir(directory_str);
+    assert(error != FR_INVALID_NAME);
     if (error) {
         if (error == FR_EXIST) {
             PRINTF("Directory exists.\r\n");
@@ -361,17 +363,27 @@ sd_card_write_to_file(
 	assert(directory_str != NULL);
 	assert(directory_str_length > 0);
 
-	// TODO: Open directory based on parameters
-
-    if (f_opendir(&directory, "/dir_1")) {
+    if (f_opendir(&directory, directory_str)) {
         PRINTF("Open directory failed.\r\n");
         return false;
     }
+
+    /// Create filepath
+    const uint32_t filepath_length = 200u;
+    char filepath[filepath_length];
+    assert(filepath_length > directory_str_length + filename_str_length);
+    sprintf(
+    		filepath,
+    		"%s/%s",
+			directory_str,
+			filename_str);
     error = f_open(
     		&g_fileObject,
-			_T("/dir_1/f_1.txt"),
+			_T(filepath),
 			(FA_WRITE | FA_READ | FA_CREATE_ALWAYS));
     if (error) {
+    	assert(error != FR_INVALID_NAME);
+
         if (error == FR_EXIST) {
             if (overwrite) {
             	PRINTF("File exists. Exiting\r\n");

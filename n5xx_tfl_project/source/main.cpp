@@ -34,9 +34,9 @@ float
 OUTPUT_BUFFER[NUM_CLASSES] = {};
 
 const std::string
-OUTPUT_FILENAME = "my_results.txt";
+OUTPUT_FILENAME = "results.txt";
 const std::string
-OUTPUT_DIRECTORY = "my_results_dir";
+OUTPUT_DIRECTORY = "output";
 constexpr bool
 OVERWRITE_FILE_IS_OKAY = true;
 

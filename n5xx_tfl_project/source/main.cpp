@@ -131,14 +131,17 @@ int main(void) {
     	}
     	assert(best_score >= 0.0f and best_class_id < NUM_CLASSES);
 
+    	/// Float is unsupported in sprintf
+    	/// For percentage, we only care the 2 digits
+    	uint8_t best_score_uint8 = (uint8_t)(best_score * 100.0f);
+
     	/// Store results into a buffer
     	std::string output_buffer(100, 0);
 		sprintf(
 				output_buffer.data(),
-				"id=%lu score=%.5f\r\n",
+				"id=%lu score=%u\r\n",
 				best_class_id,
-				best_score);
-		output_buffer.shrink_to_fit();
+				best_score_uint8);
     	PRINTF("%s\r\n", output_buffer.data());
 
     	/// Export results to SD card

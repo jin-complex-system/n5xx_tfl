@@ -3,8 +3,8 @@
 
 #include <cstdint>
 
-//#define USE_NO_QUANTIIZATION 1
-#define USE_QUANTIZATION 1
+#define USE_NO_QUANTIIZATION 1
+//#define USE_QUANTIZATION 1
 //#define USE_QUANTIZATION_NEUTRON 1
 
 #ifdef USE_NO_QUANTIIZATION

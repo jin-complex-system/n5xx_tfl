@@ -91,6 +91,10 @@ app_main_loop() {
 	str_buffer(MAX_NUM_DATA * NUM_CHARS_PER_LINE, 0);
 
 	/// Store results
+	uint8_t
+	best_score = 0;
+	uint8_t
+	best_class_id = 0;
     uint8_t
 	best_scores_percentages[MAX_NUM_DATA];
     uint8_t
@@ -169,8 +173,6 @@ app_main_loop() {
 					new_line_ptr,
 					"%s",
 					current_file_info.fname);
-
-				num_iterations++;
 				current_state = APP_STATE_INFERENCE;
 			}
 			break;
@@ -247,39 +249,42 @@ app_main_loop() {
 		case APP_STATE_PROCESS_INFERENCE:
 		{
 			/// Get the best score
-			inference_data_type best_score = 0;
-			uint8_t best_class_id = NUM_CLASSES + 1;
+			inference_data_type best_score_inference = 0;
 
 			/// Grab the best score from the output buffer
 			for (uint32_t iterator = 0; iterator < NUM_CLASSES; iterator++) {
-				if (best_score < OUTPUT_BUFFER[iterator]) {
+				if (best_score_inference < OUTPUT_BUFFER[iterator]) {
 					best_class_id = iterator;
-					best_score = OUTPUT_BUFFER[iterator];
+					best_score_inference = OUTPUT_BUFFER[iterator];
 				}
 			}
-			assert(best_score > 0 && best_class_id < NUM_CLASSES);
-
-			best_class_ids[num_iterations] = best_class_id;
+			assert(best_score_inference > 0 && best_class_id < NUM_CLASSES);
 
 #ifdef USE_NO_QUANTIIZATION
 			/// Float is unsupported in sprintf
 			/// For percentage, we only care the 2 digits
-			best_scores_percentages[num_iterations] =
-					(uint8_t)(best_score * 100.0f);
+			best_score = (uint8_t)(best_score_inference * 100.0f);
 #endif // USE_NO_QUANTIIZATION
 
 #ifdef USE_QUANTIZATION
-			best_scores_percentages[num_iterations] = best_score;
+			best_score = (uint8_t)best_score_inference;
 #endif // USE_QUANTIZATION
 
 #ifdef USE_QUANTIZATION_NEUTRON
-			best_scores_percentages[num_iterations] = best_score;
+			best_score = (uint8_t)best_score_inference;
 #endif // USE_QUANTIZATION_NEUTRON
+
+			best_class_ids[num_iterations] = best_class_id;
+			best_scores_percentages[num_iterations] = best_score;
 
 			PRINTF(
 					"id=%u score=%u\r\n",
 					best_class_id,
-					best_scores_percentages[num_iterations]);
+					best_score);
+
+			if (sd_card_loop) {
+				num_iterations++;
+			}
 
 			current_state = APP_STATE_CHECK_BUTTON;
 			break;

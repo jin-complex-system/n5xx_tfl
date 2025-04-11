@@ -29,7 +29,7 @@ uint16_t
 num_iterations = 0;
 
 static
-float
+inference_data_type
 input_buffer[INPUT_ARRAY_LENGTH];
 
 static
@@ -37,7 +37,7 @@ uint32_t
 input_buffer_length = 0;
 
 static
-float
+inference_data_type
 OUTPUT_BUFFER[NUM_CLASSES] = {};
 
 void
@@ -161,7 +161,7 @@ app_main_loop() {
 				);
 				assert(
 						input_buffer_length > 0 &&
-						input_buffer_length <= INPUT_ARRAY_LENGTH * sizeof(float));
+						input_buffer_length <= INPUT_ARRAY_LENGTH * sizeof(inference_data_type));
 
 				/// Copy over filename to str_buffer
 	    		char* new_line_ptr = str_buffer.data() + num_iterations * NUM_CHARS_PER_LINE;
@@ -247,7 +247,7 @@ app_main_loop() {
 		case APP_STATE_PROCESS_INFERENCE:
 		{
 			/// Get the best score
-			float best_score = -1.0f;
+			inference_data_type best_score = 0;
 			uint8_t best_class_id = NUM_CLASSES + 1;
 
 			/// Grab the best score from the output buffer
@@ -257,13 +257,24 @@ app_main_loop() {
 					best_score = OUTPUT_BUFFER[iterator];
 				}
 			}
-			assert(best_score >= 0.0f && best_class_id < NUM_CLASSES);
+			assert(best_score > 0 && best_class_id < NUM_CLASSES);
 
+			best_class_ids[num_iterations] = best_class_id;
+
+#ifdef USE_NO_QUANTIIZATION
 			/// Float is unsupported in sprintf
 			/// For percentage, we only care the 2 digits
 			best_scores_percentages[num_iterations] =
 					(uint8_t)(best_score * 100.0f);
-			best_class_ids[num_iterations] = best_class_id;
+#endif // USE_NO_QUANTIIZATION
+
+#ifdef USE_QUANTIZATION
+			best_scores_percentages[num_iterations] = best_score;
+#endif // USE_QUANTIZATION
+
+#ifdef USE_QUANTIZATION_NEUTRON
+			best_scores_percentages[num_iterations] = best_score;
+#endif // USE_QUANTIZATION_NEUTRON
 
 			PRINTF(
 					"id=%u score=%u\r\n",

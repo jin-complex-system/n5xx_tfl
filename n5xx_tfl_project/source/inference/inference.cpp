@@ -1,5 +1,16 @@
 #include "inference.h"
+
+#ifdef USE_NO_QUANTIIZATION
 #include "models/DTFT_model.h"
+#endif // USE_NO_QUANTIIZATION
+
+#ifdef USE_QUANTIZATION
+#include "models/DTFT_model_quantized.h"
+#endif // USE_NO_QUANTIIZATION
+
+#ifdef USE_QUANTIZATION_NEUTRON
+#include "models/DTFT_model_quantized_neutron.h"
+#endif // USE_QUANTIZATION_NEUTRON
 
 #include <cassert>
 #include <tensorflow/lite/micro/kernels/micro_ops.h>
@@ -20,7 +31,7 @@ s_interpreter = nullptr;
 /// An area of memory to use for input, output, and intermediate arrays.
 /// (Can be adjusted based on the model needs.)
 constexpr uint32_t
-kTensorArenaSize = 300 * 1024;
+kTensorArenaSize = 350 * 1024;
 
 #ifdef TENSORARENA_NONCACHE
 static uint8_t classifier_tensorArena[kTensorArenaSize] __ALIGNED(16) __attribute__((section("NonCacheable")));
@@ -30,13 +41,38 @@ uint8_t
 s_tensorArena[kTensorArenaSize] __attribute__((aligned(16)));
 #endif // TENSORARENA_NONCACHE
 
+
+#ifdef USE_NO_QUANTIIZATION
 static
 tflite::MicroMutableOpResolver<13>
 s_microOpResolver;
 
+constexpr TfLiteType
+EXPECTED_DATA_TYPE = kTfLiteFloat32;
+#endif // USE_NO_QUANTIIZATION
+
+#ifdef USE_QUANTIZATION
+static
+tflite::MicroMutableOpResolver<14>
+s_microOpResolver;
+
+constexpr TfLiteType
+EXPECTED_DATA_TYPE = kTfLiteUInt8;
+#endif //USE_NO_QUANTIIZATION
+
+#ifdef USE_QUANTIZATION_NEUTRON
+static
+tflite::MicroMutableOpResolver<9>
+s_microOpResolver;
+
+constexpr TfLiteType
+EXPECTED_DATA_TYPE = kTfLiteUInt8;
+#endif //USE_QUANTIZATION_NEUTRON
+
 static inline
 void
 model_GetOpsResolver(void) {
+#ifdef USE_NO_QUANTIIZATION
 	s_microOpResolver.AddFullyConnected();
 	s_microOpResolver.AddTranspose();
 	s_microOpResolver.AddAdd();
@@ -50,6 +86,36 @@ model_GetOpsResolver(void) {
 	s_microOpResolver.AddSoftmax();
 	s_microOpResolver.AddConv2D();
 	s_microOpResolver.AddConcatenation();
+#endif // USE_NO_QUANTIIZATION
+
+#ifdef USE_QUANTIZATION
+	s_microOpResolver.AddQuantize();
+	s_microOpResolver.AddFullyConnected();
+	s_microOpResolver.AddTranspose();
+	s_microOpResolver.AddAdd();
+	s_microOpResolver.AddMean();
+	s_microOpResolver.AddSquaredDifference();
+	s_microOpResolver.AddRsqrt();
+	s_microOpResolver.AddMul();
+	s_microOpResolver.AddSub();
+	s_microOpResolver.AddReshape();
+	s_microOpResolver.AddBatchMatMul();
+	s_microOpResolver.AddSoftmax();
+	s_microOpResolver.AddConv2D();
+	s_microOpResolver.AddConcatenation();
+#endif //USE_NO_QUANTIIZATION
+
+#ifdef USE_QUANTIZATION_NEUTRON
+	s_microOpResolver.AddQuantize();
+	s_microOpResolver.AddMean();
+	s_microOpResolver.AddSquaredDifference();
+	s_microOpResolver.AddTranspose();
+	s_microOpResolver.AddAdd();
+	s_microOpResolver.AddRsqrt();
+	s_microOpResolver.AddMul();
+	s_microOpResolver.AddSoftmax();
+	s_microOpResolver.AddCustom(tflite::GetString_NEUTRON_GRAPH(), tflite::Register_NEUTRON_GRAPH());
+#endif //USE_QUANTIZATION_NEUTRON
 }
 
 void
@@ -78,7 +144,7 @@ inference_setup(void) {
 
 void
 inference_set_input(
-	const float* input_buffer,
+	const inference_data_type* input_buffer,
 	const uint32_t input_buffer_length) {
 	/// Check parameters
 	{
@@ -89,7 +155,7 @@ inference_set_input(
 	assert(s_interpreter != nullptr);
 	TfLiteTensor* inputTensor = s_interpreter->input(0);
 	assert(inputTensor != nullptr);
-	assert(inputTensor->type == kTfLiteFloat32);
+	assert(inputTensor->type == EXPECTED_DATA_TYPE);
 
 #ifndef NDEBUG
 	uint32_t tensor_size = 1;
@@ -99,7 +165,13 @@ inference_set_input(
 	assert(input_buffer_length == tensor_size);
 #endif // NDEBUG
 
-	float* tensor_input = inputTensor->data.f;
+	inference_data_type* tensor_input;
+	if (EXPECTED_DATA_TYPE == kTfLiteUInt8) {
+		tensor_input = (inference_data_type *)inputTensor->data.uint8;
+	}
+	else if (EXPECTED_DATA_TYPE == kTfLiteFloat32) {
+		tensor_input = (inference_data_type *)inputTensor->data.f;
+	}
 	assert(tensor_input != nullptr);
 
 	/// Load input
@@ -113,7 +185,7 @@ inference_set_input(
 
 void
 inference_get_output(
-	float* output_buffer,
+	inference_data_type* output_buffer,
 	const uint32_t output_buffer_length) {
 	/// Check parameters
 	{
@@ -124,7 +196,7 @@ inference_get_output(
 	assert(s_interpreter != nullptr);
     TfLiteTensor* outputtTensor = s_interpreter->output(0);
     assert(outputtTensor != nullptr);
-    assert(outputtTensor->type == kTfLiteFloat32);
+    assert(outputtTensor->type == EXPECTED_DATA_TYPE);
 
 #ifndef NDEBUG
 	uint32_t tensor_size = 1;
@@ -134,18 +206,22 @@ inference_get_output(
 	assert(output_buffer_length == tensor_size);
 #endif // NDEBUG
 
-	float* tensor_output = outputtTensor->data.f;
+	inference_data_type* tensor_output;
+	if (EXPECTED_DATA_TYPE == kTfLiteUInt8) {
+		tensor_output = (inference_data_type *)outputtTensor->data.uint8;
+	}
+	else if (EXPECTED_DATA_TYPE == kTfLiteFloat32) {
+		tensor_output = (inference_data_type *)outputtTensor->data.f;
+	}
 	assert(tensor_output != nullptr);
 
     /// Unload output buffer
     {
         for (uint32_t tensor_iterator = 0; tensor_iterator < output_buffer_length; tensor_iterator++) {
-        	float my_output = tensor_output[tensor_iterator];
-        	assert(my_output <= 1.0f);
+        	inference_data_type my_output = tensor_output[tensor_iterator];
         	output_buffer[tensor_iterator] = my_output;
         }
     }
-
 }
 
 void

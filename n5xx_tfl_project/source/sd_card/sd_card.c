@@ -419,10 +419,10 @@ sd_card_get_next_file_information(
 	return false;
 }
 
-uint16_t
+uint32_t
 sd_card_read_from_file(
 	void* target_buffer,
-	const uint16_t max_buffer_length,
+	const uint32_t max_buffer_length,
 	const char* target_filepath_str) {
 	uint32_t bytesRead = 0;
 	FRESULT error;

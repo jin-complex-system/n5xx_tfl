@@ -74,10 +74,10 @@ sd_card_get_next_file_information(
  * @param target_filename_str NULL-terminated string of a file in the opened directory
  * @return length of the actual read data
  */
-uint16_t
+uint32_t
 sd_card_read_from_file(
 	void* target_buffer,
-	const uint16_t max_buffer_length,
+	const uint32_t max_buffer_length,
 	const char* target_filename_str);
 
 /**

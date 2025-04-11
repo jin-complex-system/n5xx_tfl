@@ -7,7 +7,6 @@
 #include <fsl_port.h>
 #include <pin_mux.h>
 #include <fsl_debug_console.h>
-#include <ff.h>
 #include <diskio.h>
 #include <fsl_sd_disk.h>
 #include "sdmmc_config.h"
@@ -18,12 +17,24 @@ static
 status_t
 sdcardWaitCardInsert(void);
 
-static FATFS g_fileSystem; /* File system object */
-static FIL g_fileObject;   /* File object */
+static
+FATFS
+g_fileSystem; /* File system object */
+static
+FIL
+g_fileObject;   /* File object */
 
 static
 bool
 sd_card_initialise = false;
+
+static
+bool
+sd_card_directory_open = false;
+
+static
+DIR
+current_directory;
 
 static
 void
@@ -327,8 +338,6 @@ sd_card_create_directory(
 	assert(directory_str != NULL);
 	assert(directory_str_length > 0);
 
-	// TODO: Create directory based on parameters
-
     error = f_mkdir(directory_str);
     assert(error != FR_INVALID_NAME);
     if (error) {
@@ -345,6 +354,120 @@ sd_card_create_directory(
 }
 
 bool
+sd_card_open_directory(
+	const char* directory_str,
+	const uint16_t directory_str_length) {
+	/// Check parameters
+	assert(sd_card_initialise);
+	assert(directory_str != NULL);
+	assert(directory_str_length > 0);
+	assert(!sd_card_directory_open);
+
+    if (f_opendir(&current_directory, directory_str)) {
+        PRINTF("Open directory failed.\r\n");
+        return false;
+    }
+    sd_card_directory_open = true;
+    return sd_card_is_directory_open();
+}
+
+bool
+sd_card_is_directory_open(void) {
+	return sd_card_directory_open;
+}
+
+void
+sd_card_close_directory(void) {
+	if (sd_card_is_directory_open()) {
+		f_closedir(&current_directory);
+	}
+
+	sd_card_directory_open = false;
+}
+
+bool
+sd_card_get_next_file_information(
+	FILINFO* file_information) {
+	FRESULT error;
+
+	/// Check parameters
+	assert(sd_card_initialise);
+	assert(sd_card_is_directory_open());
+	assert(file_information != NULL);
+
+	while(true) {
+		error = f_readdir(&current_directory, file_information);
+
+	    /// Reached the end
+	    if ((error != FR_OK) || (file_information->fname[0U] == 0U)) {
+	        return false;
+	    }
+	    else if (file_information->fname[0] == '.') {
+	        continue;
+	    }
+	    else if (file_information->fattrib & AM_DIR) {
+	        continue;
+	    }
+	    /// Filename
+	    else {
+	    	return true;
+	    }
+	}
+
+	// Should not reach here
+	assert(false);
+	return false;
+}
+
+uint16_t
+sd_card_read_from_file(
+	void* target_buffer,
+	const uint16_t max_buffer_length,
+	const char* target_filepath_str) {
+	uint32_t bytesRead = 0;
+	FRESULT error;
+
+	/// Check parameters
+	assert(sd_card_initialise);
+	assert(target_buffer != NULL);
+	assert(max_buffer_length > 0);
+	assert(sd_card_is_directory_open());
+	assert(target_filepath_str != NULL);
+
+	/// Open the file
+    error = f_open(
+    		&g_fileObject,
+			_T(target_filepath_str),
+			FA_READ);
+    if (error != FR_OK) {
+    	assert(error != FR_INVALID_NAME);
+
+    	PRINTF("Open file failed.\r\n");
+    	return bytesRead;
+    }
+
+    /// Read from file
+	error = f_read(
+			&g_fileObject,
+			target_buffer,
+			max_buffer_length,
+			(UINT*)&bytesRead);
+    if ((error) || (bytesRead > max_buffer_length)) {
+        PRINTF("Read file failed. \r\n");
+        bytesRead = 0;
+    }
+
+    /// Close file
+    error = f_close(&g_fileObject);
+    if (error) {
+        PRINTF("Closing the file failed. \r\n");
+        bytesRead = 0;
+    }
+
+    return bytesRead;
+}
+
+bool
 sd_card_write_to_file(
 		const char* filename_str,
 		const uint16_t filename_str_length,
@@ -354,7 +477,6 @@ sd_card_write_to_file(
 		const uint16_t data_buffer_length,
 		const bool overwrite) {
 	FRESULT error;
-	DIR directory; /* Directory object */
 
 	/// Check parameters
 	assert(sd_card_initialise);
@@ -363,10 +485,14 @@ sd_card_write_to_file(
 	assert(directory_str != NULL);
 	assert(directory_str_length > 0);
 
-    if (f_opendir(&directory, directory_str)) {
-        PRINTF("Open directory failed.\r\n");
-        return false;
-    }
+	if (sd_card_is_directory_open()) {
+
+	}
+	/// unsupported
+	else {
+		PRINTF("Need to open directory first\r\n");
+		return false;
+	}
 
     /// Create filepath
     const uint32_t filepath_length = 200u;
@@ -423,7 +549,6 @@ sd_card_write_to_file(
         PRINTF("Closing the file failed. \r\n");
         return false;
     }
-
     return true;
 }
 

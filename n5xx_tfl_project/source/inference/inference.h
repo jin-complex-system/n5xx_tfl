@@ -3,21 +3,12 @@
 
 #include <cstdint>
 
-#define USE_NO_QUANTIIZATION 1
-//#define USE_QUANTIZATION 1
-//#define USE_QUANTIZATION_NEUTRON 1
+//#define CNN_MODEL_NO_NEUTRON 1
+#define CNN_MODEL_NEUTRON 1
+//#define DTFT_MODEL_NO_NEUTRON 1
+//#define DTFT_MODEL_NEUTRON 1
 
-#ifdef USE_NO_QUANTIIZATION
-typedef float inference_data_type;
-#endif //USE_NO_QUANTIIZATION
-
-#ifdef USE_QUANTIZATION
 typedef uint8_t inference_data_type;
-#endif //USE_NO_QUANTIIZATION
-
-#ifdef USE_QUANTIZATION_NEUTRON
-typedef uint8_t inference_data_type;
-#endif // USE_QUANTIZATION_NEUTRON
 
 void
 inference_setup(void);

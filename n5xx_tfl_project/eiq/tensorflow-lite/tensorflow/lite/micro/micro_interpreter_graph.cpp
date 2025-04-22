@@ -110,8 +110,10 @@ TfLiteStatus MicroInterpreterGraph::PrepareSubgraphs() {
       if (registration->prepare != nullptr) {
         TfLiteStatus prepare_status = registration->prepare(context_, node);
         if (prepare_status != kTfLiteOk) {
+        	const auto op_name = OpNameFromRegistration(registration);
+
           MicroPrintf("Node %s (number %df) failed to prepare with status %d",
-                      OpNameFromRegistration(registration),
+        		  	  op_name,
                       current_operator_index_, prepare_status);
           return kTfLiteError;
         }

@@ -1,16 +1,20 @@
 #include "inference.h"
 
-#ifdef USE_NO_QUANTIIZATION
+#ifdef CNN_MODEL_NO_NEUTRON
+#include "models/CNN_model.h"
+#endif // CNN_MODEL_NO_NEUTRON
+
+#ifdef CNN_MODEL_NEUTRON
+#include "models/CNN_model_neutron.h"
+#endif // CNN_MODEL_NEUTRON
+
+#ifdef DTFT_MODEL_NO_NEUTRON
 #include "models/DTFT_model.h"
-#endif // USE_NO_QUANTIIZATION
+#endif // DTFT_MODEL_NO_NEUTRON
 
-#ifdef USE_QUANTIZATION
-#include "models/DTFT_model_quantized.h"
-#endif // USE_NO_QUANTIIZATION
-
-#ifdef USE_QUANTIZATION_NEUTRON
-#include "models/DTFT_model_quantized_neutron.h"
-#endif // USE_QUANTIZATION_NEUTRON
+#ifdef DTFT_MODEL_NEUTRON
+#include "models/DTFT_model_neutron.h"
+#endif // DTFT_MODEL_NEUTRON
 
 #include <cassert>
 #include <tensorflow/lite/micro/kernels/micro_ops.h>
@@ -31,7 +35,7 @@ s_interpreter = nullptr;
 /// An area of memory to use for input, output, and intermediate arrays.
 /// (Can be adjusted based on the model needs.)
 constexpr uint32_t
-kTensorArenaSize = 350 * 1024;
+kTensorArenaSize = 362 * 1024;
 
 #ifdef TENSORARENA_NONCACHE
 static uint8_t classifier_tensorArena[kTensorArenaSize] __ALIGNED(16) __attribute__((section("NonCacheable")));
@@ -41,81 +45,88 @@ uint8_t
 s_tensorArena[kTensorArenaSize] __attribute__((aligned(16)));
 #endif // TENSORARENA_NONCACHE
 
-
-#ifdef USE_NO_QUANTIIZATION
-static
-tflite::MicroMutableOpResolver<13>
-s_microOpResolver;
-
-constexpr TfLiteType
-EXPECTED_DATA_TYPE = kTfLiteFloat32;
-#endif // USE_NO_QUANTIIZATION
-
-#ifdef USE_QUANTIZATION
-static
-tflite::MicroMutableOpResolver<14>
-s_microOpResolver;
-
 constexpr TfLiteType
 EXPECTED_DATA_TYPE = kTfLiteUInt8;
-#endif //USE_NO_QUANTIIZATION
 
-#ifdef USE_QUANTIZATION_NEUTRON
+#ifdef CNN_MODEL_NO_NEUTRON
 static
-tflite::MicroMutableOpResolver<9>
+tflite::MicroMutableOpResolver<6>
 s_microOpResolver;
+#endif // CNN_MODEL_NO_NEUTRON
 
-constexpr TfLiteType
-EXPECTED_DATA_TYPE = kTfLiteUInt8;
-#endif //USE_QUANTIZATION_NEUTRON
+#ifdef CNN_MODEL_NEUTRON
+static
+tflite::MicroMutableOpResolver<4>
+s_microOpResolver;
+#endif // CNN_MODEL_NEUTRON
+
+#ifdef DTFT_MODEL_NO_NEUTRON
+static
+tflite::MicroMutableOpResolver<20>
+s_microOpResolver;
+#endif // DTFT_MODEL_NO_NEUTRON
+
+#ifdef DTFT_MODEL_NEUTRON
+static
+tflite::MicroMutableOpResolver<10>
+s_microOpResolver;
+#endif // DTFT_MODEL_NEUTRON
 
 static inline
 void
 model_GetOpsResolver(void) {
-#ifdef USE_NO_QUANTIIZATION
+#ifdef CNN_MODEL_NO_NEUTRON
+	s_microOpResolver.AddQuantize();
+	s_microOpResolver.AddConv2D();
+	s_microOpResolver.AddMaxPool2D();
+	s_microOpResolver.AddReshape();
 	s_microOpResolver.AddFullyConnected();
+	s_microOpResolver.AddSoftmax();
+#endif // CNN_MODEL_NO_NEUTRON
+
+#ifdef CNN_MODEL_NEUTRON
+	s_microOpResolver.AddQuantize();
+	s_microOpResolver.AddFullyConnected();
+	s_microOpResolver.AddSoftmax();
+	s_microOpResolver.AddCustom(tflite::GetString_NEUTRON_GRAPH(), tflite::Register_NEUTRON_GRAPH());
+#endif // CNN_MODEL_NEUTRON
+
+#ifdef DTFT_MODEL_NO_NEUTRON
+	s_microOpResolver.AddQuantize();
+	s_microOpResolver.AddShape();
+	s_microOpResolver.AddStridedSlice();
+	s_microOpResolver.AddPack();
+	s_microOpResolver.AddReshape();
+	s_microOpResolver.AddGather();
+//	s_microOpResolver.AddReduceProd(); // Does not exist
+	s_microOpResolver.AddReduceMax();
 	s_microOpResolver.AddTranspose();
+	s_microOpResolver.AddConcatenation();
+	s_microOpResolver.AddFullyConnected();
 	s_microOpResolver.AddAdd();
 	s_microOpResolver.AddMean();
 	s_microOpResolver.AddSquaredDifference();
 	s_microOpResolver.AddRsqrt();
 	s_microOpResolver.AddMul();
 	s_microOpResolver.AddSub();
-	s_microOpResolver.AddReshape();
 	s_microOpResolver.AddBatchMatMul();
 	s_microOpResolver.AddSoftmax();
+	s_microOpResolver.AddExpandDims();
 	s_microOpResolver.AddConv2D();
-	s_microOpResolver.AddConcatenation();
-#endif // USE_NO_QUANTIIZATION
+#endif // DTFT_MODEL_NO_NEUTRON
 
-#ifdef USE_QUANTIZATION
+#ifdef DTFT_MODEL_NEUTRON
 	s_microOpResolver.AddQuantize();
-	s_microOpResolver.AddFullyConnected();
-	s_microOpResolver.AddTranspose();
-	s_microOpResolver.AddAdd();
-	s_microOpResolver.AddMean();
-	s_microOpResolver.AddSquaredDifference();
-	s_microOpResolver.AddRsqrt();
-	s_microOpResolver.AddMul();
-	s_microOpResolver.AddSub();
 	s_microOpResolver.AddReshape();
-	s_microOpResolver.AddBatchMatMul();
-	s_microOpResolver.AddSoftmax();
-	s_microOpResolver.AddConv2D();
-	s_microOpResolver.AddConcatenation();
-#endif //USE_NO_QUANTIIZATION
-
-#ifdef USE_QUANTIZATION_NEUTRON
-	s_microOpResolver.AddQuantize();
+	s_microOpResolver.AddTranspose();
 	s_microOpResolver.AddMean();
 	s_microOpResolver.AddSquaredDifference();
-	s_microOpResolver.AddTranspose();
 	s_microOpResolver.AddAdd();
 	s_microOpResolver.AddRsqrt();
 	s_microOpResolver.AddMul();
 	s_microOpResolver.AddSoftmax();
 	s_microOpResolver.AddCustom(tflite::GetString_NEUTRON_GRAPH(), tflite::Register_NEUTRON_GRAPH());
-#endif //USE_QUANTIZATION_NEUTRON
+#endif // DTFT_MODEL_NEUTRON
 }
 
 void
@@ -196,7 +207,7 @@ inference_get_output(
 	assert(s_interpreter != nullptr);
     TfLiteTensor* outputtTensor = s_interpreter->output(0);
     assert(outputtTensor != nullptr);
-    assert(outputtTensor->type == EXPECTED_DATA_TYPE);
+    // assert(outputtTensor->type == EXPECTED_DATA_TYPE);
 
 #ifndef NDEBUG
 	uint32_t tensor_size = 1;

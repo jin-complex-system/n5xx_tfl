@@ -8,6 +8,7 @@
 #include <sd_card/sd_card.h>
 #include <cstring>
 #include <string>
+#include <cr_section_macros.h>
 
 static APP_STATE
 current_state = APP_STATE_INIT;
@@ -28,6 +29,7 @@ static
 uint16_t
 num_iterations = 0;
 
+__BSS(RAM2)
 static
 inference_data_type
 input_buffer[INPUT_ARRAY_LENGTH];
@@ -36,6 +38,7 @@ static
 uint32_t
 input_buffer_length = 0;
 
+__BSS(RAM2)
 static
 inference_data_type
 OUTPUT_BUFFER[NUM_CLASSES] = {};

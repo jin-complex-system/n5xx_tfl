@@ -11,13 +11,15 @@
 #include <inference/inference_definitions.h>
 #include <inference/inference.h>
 
+__BSS(RAM3)
 static APP_STATE
 current_state = APP_STATE_INIT;
 
 static constexpr
 uint16_t
-MAX_NUM_DATA = 100u;
+MAX_NUM_DATA = 110u;
 
+__BSS(RAM3)
 static
 uint16_t
 num_iterations = 0;
@@ -27,6 +29,7 @@ static
 inference_input_data_type
 input_buffer[INFERENCE_INPUT_ARRAY_LENGTH];
 
+__BSS(RAM3)
 static
 uint32_t
 input_buffer_length = 0;
@@ -35,6 +38,52 @@ __BSS(RAM3)
 static
 inference_output_data_type
 OUTPUT_BUFFER[NUM_CLASSES] = {};
+
+/// SD card stuff
+const
+std::string
+INPUT_DIRECTORY = "INPUT";
+const
+std::string
+OUTPUT_FILENAME = "RESULTS.TXT";
+const
+std::string
+OUTPUT_DIRECTORY = "OUTPUT";
+constexpr
+bool
+OVERWRITE_FILE_IS_OKAY = true;
+
+FILINFO
+current_file_info;
+
+static constexpr
+uint32_t
+MAX_INPUT_LENGTH = sizeof(current_file_info.fname);
+
+static constexpr
+uint32_t
+EXPECTED_INPUT_FILENAME_LENGTH = MAX_INPUT_LENGTH + 1;
+
+static const
+uint32_t
+MAX_INPUT_FILEPATH_LENGTH = INPUT_DIRECTORY.length() + 1 + EXPECTED_INPUT_FILENAME_LENGTH;
+
+static constexpr
+uint32_t
+NUM_CHARS_PER_LINE = EXPECTED_INPUT_FILENAME_LENGTH + 20;
+
+__BSS(RAM3)
+static
+std::string
+str_buffer(MAX_NUM_DATA * NUM_CHARS_PER_LINE, 0);
+
+__BSS(RAM3)
+uint8_t
+best_scores[MAX_NUM_DATA];
+
+__BSS(RAM3)
+uint8_t
+best_class_ids[MAX_NUM_DATA];
 
 void
 app_setup() {
@@ -63,38 +112,11 @@ app_main_loop() {
 	bool
 	success;
 
-	/// SD card stuff
-	const std::string
-	INPUT_DIRECTORY = "INPUT";
-	const std::string
-	OUTPUT_FILENAME = "RESULTS.TXT";
-	const std::string
-	OUTPUT_DIRECTORY = "OUTPUT";
-	constexpr bool
-	OVERWRITE_FILE_IS_OKAY = true;
-    FILINFO
-	current_file_info;
-
-    constexpr uint32_t
-    MAX_INPUT_LENGTH = sizeof(current_file_info.fname);
-    constexpr uint32_t
-	EXPECTED_INPUT_FILENAME_LENGTH = MAX_INPUT_LENGTH + 1;
-    const uint32_t
-	MAX_INPUT_FILEPATH_LENGTH = INPUT_DIRECTORY.length() + 1 + EXPECTED_INPUT_FILENAME_LENGTH;
-    constexpr uint32_t
-    NUM_CHARS_PER_LINE = EXPECTED_INPUT_FILENAME_LENGTH + 20;
-	std::string
-	str_buffer(MAX_NUM_DATA * NUM_CHARS_PER_LINE, 0);
-
 	/// Store results
 	uint8_t
 	best_score = 0;
 	uint8_t
 	best_class_id = 0;
-    uint8_t
-	best_scores_percentages[MAX_NUM_DATA];
-    uint8_t
-	best_class_ids[MAX_NUM_DATA];
 
 	while(true) {
 		switch(current_state) {
@@ -195,7 +217,7 @@ app_main_loop() {
 						new_line_ptr,
 						" id=%u score=%u\r\n",
 						best_class_ids[iterator],
-						best_scores_percentages[iterator]);
+						best_scores[iterator]);
 	    	}
 
 	    	success =
@@ -244,34 +266,19 @@ app_main_loop() {
 		}
 		case APP_STATE_PROCESS_INFERENCE:
 		{
-			/// Get the best score
-			inference_output_data_type best_score_inference = 0;
+			best_score = 0;
 
 			/// Grab the best score from the output buffer
 			for (uint32_t iterator = 0; iterator < NUM_CLASSES; iterator++) {
-				if (best_score_inference < OUTPUT_BUFFER[iterator]) {
+				if (best_score < OUTPUT_BUFFER[iterator]) {
 					best_class_id = iterator;
-					best_score_inference = OUTPUT_BUFFER[iterator];
+					best_score = OUTPUT_BUFFER[iterator];
 				}
 			}
-			assert(best_score_inference > 0 && best_class_id < NUM_CLASSES);
-
-#ifdef USE_NO_QUANTIIZATION
-			/// Float is unsupported in sprintf
-			/// For percentage, we only care the 2 digits
-			best_score = (uint8_t)(best_score_inference * 100.0f);
-#endif // USE_NO_QUANTIIZATION
-
-#ifdef USE_QUANTIZATION
-			best_score = (uint8_t)best_score_inference;
-#endif // USE_QUANTIZATION
-
-#ifdef USE_QUANTIZATION_NEUTRON
-			best_score = (uint8_t)best_score_inference;
-#endif // USE_QUANTIZATION_NEUTRON
+			assert(best_score >= 0 && best_class_id < NUM_CLASSES);
 
 			best_class_ids[num_iterations] = best_class_id;
-			best_scores_percentages[num_iterations] = best_score;
+			best_scores[num_iterations] = best_score;
 
 			PRINTF(
 					"id=%u score=%u\r\n",

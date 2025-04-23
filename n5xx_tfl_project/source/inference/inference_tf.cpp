@@ -35,7 +35,7 @@ s_interpreter = nullptr;
 /// An area of memory to use for input, output, and intermediate arrays.
 /// (Can be adjusted based on the model needs.)
 constexpr uint32_t
-kTensorArenaSize = 362 * 1024;
+kTensorArenaSize = 350 * 1024;
 
 #ifdef TENSORARENA_NONCACHE
 static uint8_t classifier_tensorArena[kTensorArenaSize] __ALIGNED(16) __attribute__((section("NonCacheable")));
@@ -45,9 +45,6 @@ uint8_t
 s_tensorArena[kTensorArenaSize] __attribute__((aligned(16)));
 #endif // TENSORARENA_NONCACHE
 
-constexpr TfLiteType
-EXPECTED_DATA_TYPE = kTfLiteUInt8;
-
 #ifdef CNN_MODEL_NO_NEUTRON
 static
 tflite::MicroMutableOpResolver<6>
@@ -56,7 +53,7 @@ s_microOpResolver;
 
 #ifdef CNN_MODEL_NEUTRON
 static
-tflite::MicroMutableOpResolver<4>
+tflite::MicroMutableOpResolver<3>
 s_microOpResolver;
 #endif // CNN_MODEL_NEUTRON
 
@@ -86,7 +83,6 @@ model_GetOpsResolver(void) {
 
 #ifdef CNN_MODEL_NEUTRON
 	s_microOpResolver.AddQuantize();
-	s_microOpResolver.AddFullyConnected();
 	s_microOpResolver.AddSoftmax();
 	s_microOpResolver.AddCustom(tflite::GetString_NEUTRON_GRAPH(), tflite::Register_NEUTRON_GRAPH());
 #endif // CNN_MODEL_NEUTRON
@@ -166,7 +162,7 @@ inference_tf_set_input(
 	assert(s_interpreter != nullptr);
 	TfLiteTensor* inputTensor = s_interpreter->input(0);
 	assert(inputTensor != nullptr);
-	assert(inputTensor->type == EXPECTED_DATA_TYPE);
+	assert(inputTensor->type == EXPECTED_INPUT_DATA_TYPE);
 
 #ifndef NDEBUG
 	uint32_t tensor_size = 1;
@@ -177,10 +173,10 @@ inference_tf_set_input(
 #endif // NDEBUG
 
 	inference_input_data_type* tensor_input;
-	if (EXPECTED_DATA_TYPE == kTfLiteUInt8) {
+	if (EXPECTED_INPUT_DATA_TYPE == kTfLiteUInt8) {
 		tensor_input = (inference_input_data_type *)inputTensor->data.uint8;
 	}
-	else if (EXPECTED_DATA_TYPE == kTfLiteFloat32) {
+	else if (EXPECTED_INPUT_DATA_TYPE == kTfLiteFloat32) {
 		tensor_input = (inference_input_data_type *)inputTensor->data.f;
 	}
 	assert(tensor_input != nullptr);
@@ -207,7 +203,7 @@ inference_tf_get_output(
 	assert(s_interpreter != nullptr);
     TfLiteTensor* outputtTensor = s_interpreter->output(0);
     assert(outputtTensor != nullptr);
-    // assert(outputtTensor->type == EXPECTED_DATA_TYPE);
+    assert(outputtTensor->type == EXPECTED_OUTPUT_DATA_TYPE);
 
 #ifndef NDEBUG
 	uint32_t tensor_size = 1;
@@ -218,10 +214,10 @@ inference_tf_get_output(
 #endif // NDEBUG
 
 	inference_output_data_type* tensor_output;
-	if (EXPECTED_DATA_TYPE == kTfLiteUInt8) {
+	if (EXPECTED_OUTPUT_DATA_TYPE == kTfLiteUInt8) {
 		tensor_output = (inference_output_data_type *)outputtTensor->data.uint8;
 	}
-	else if (EXPECTED_DATA_TYPE == kTfLiteFloat32) {
+	else if (EXPECTED_OUTPUT_DATA_TYPE == kTfLiteFloat32) {
 		tensor_output = (inference_output_data_type *)outputtTensor->data.f;
 	}
 	assert(tensor_output != nullptr);

@@ -2,24 +2,17 @@
 
 #include <led/led.h>
 #include <button/button.h>
-#include <inference/inference.h>
 #include <cassert>
 #include <fsl_debug_console.h>
 #include <sd_card/sd_card.h>
 #include <cstring>
 #include <string>
 #include <cr_section_macros.h>
+#include <inference/inference_definitions.h>
+#include <inference/inference.h>
 
 static APP_STATE
 current_state = APP_STATE_INIT;
-
-static constexpr
-uint32_t
-NUM_CLASSES = 10;
-
-static constexpr
-uint32_t
-INPUT_ARRAY_LENGTH = (32 * 32);
 
 static constexpr
 uint16_t
@@ -29,18 +22,18 @@ static
 uint16_t
 num_iterations = 0;
 
-__BSS(RAM2)
+__BSS(RAM3)
 static
-inference_data_type
-input_buffer[INPUT_ARRAY_LENGTH];
+inference_input_data_type
+input_buffer[INFERENCE_INPUT_ARRAY_LENGTH];
 
 static
 uint32_t
 input_buffer_length = 0;
 
-__BSS(RAM2)
+__BSS(RAM3)
 static
-inference_data_type
+inference_output_data_type
 OUTPUT_BUFFER[NUM_CLASSES] = {};
 
 void
@@ -168,7 +161,7 @@ app_main_loop() {
 				);
 				assert(
 						input_buffer_length > 0 &&
-						input_buffer_length <= INPUT_ARRAY_LENGTH * sizeof(inference_data_type));
+						input_buffer_length <= INFERENCE_INPUT_ARRAY_LENGTH * sizeof(inference_input_data_type));
 
 				/// Copy over filename to str_buffer
 	    		char* new_line_ptr = str_buffer.data() + num_iterations * NUM_CHARS_PER_LINE;
@@ -238,7 +231,7 @@ app_main_loop() {
 		{
 	    	inference_set_input(
 	    			input_buffer,
-					INPUT_ARRAY_LENGTH);
+					INFERENCE_INPUT_ARRAY_LENGTH);
 	    	inference_predict();
 	    	inference_get_output(
 	    			OUTPUT_BUFFER,
@@ -252,7 +245,7 @@ app_main_loop() {
 		case APP_STATE_PROCESS_INFERENCE:
 		{
 			/// Get the best score
-			inference_data_type best_score_inference = 0;
+			inference_output_data_type best_score_inference = 0;
 
 			/// Grab the best score from the output buffer
 			for (uint32_t iterator = 0; iterator < NUM_CLASSES; iterator++) {

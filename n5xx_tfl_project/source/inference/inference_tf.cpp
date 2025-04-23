@@ -1,4 +1,4 @@
-#include "inference.h"
+#include <inference/inference_tf.h>
 
 #ifdef CNN_MODEL_NO_NEUTRON
 #include "models/CNN_model.h"
@@ -130,7 +130,7 @@ model_GetOpsResolver(void) {
 }
 
 void
-inference_setup(void) {
+inference_tf_setup(void) {
 	s_model = tflite::GetModel(model_data);
 	assert(s_model->version() == TFLITE_SCHEMA_VERSION);
 
@@ -154,8 +154,8 @@ inference_setup(void) {
 }
 
 void
-inference_set_input(
-	const inference_data_type* input_buffer,
+inference_tf_set_input(
+	const inference_input_data_type* input_buffer,
 	const uint32_t input_buffer_length) {
 	/// Check parameters
 	{
@@ -176,12 +176,12 @@ inference_set_input(
 	assert(input_buffer_length == tensor_size);
 #endif // NDEBUG
 
-	inference_data_type* tensor_input;
+	inference_input_data_type* tensor_input;
 	if (EXPECTED_DATA_TYPE == kTfLiteUInt8) {
-		tensor_input = (inference_data_type *)inputTensor->data.uint8;
+		tensor_input = (inference_input_data_type *)inputTensor->data.uint8;
 	}
 	else if (EXPECTED_DATA_TYPE == kTfLiteFloat32) {
-		tensor_input = (inference_data_type *)inputTensor->data.f;
+		tensor_input = (inference_input_data_type *)inputTensor->data.f;
 	}
 	assert(tensor_input != nullptr);
 
@@ -195,8 +195,8 @@ inference_set_input(
 }
 
 void
-inference_get_output(
-	inference_data_type* output_buffer,
+inference_tf_get_output(
+	inference_output_data_type* output_buffer,
 	const uint32_t output_buffer_length) {
 	/// Check parameters
 	{
@@ -217,26 +217,26 @@ inference_get_output(
 	assert(output_buffer_length == tensor_size);
 #endif // NDEBUG
 
-	inference_data_type* tensor_output;
+	inference_output_data_type* tensor_output;
 	if (EXPECTED_DATA_TYPE == kTfLiteUInt8) {
-		tensor_output = (inference_data_type *)outputtTensor->data.uint8;
+		tensor_output = (inference_output_data_type *)outputtTensor->data.uint8;
 	}
 	else if (EXPECTED_DATA_TYPE == kTfLiteFloat32) {
-		tensor_output = (inference_data_type *)outputtTensor->data.f;
+		tensor_output = (inference_output_data_type *)outputtTensor->data.f;
 	}
 	assert(tensor_output != nullptr);
 
     /// Unload output buffer
     {
         for (uint32_t tensor_iterator = 0; tensor_iterator < output_buffer_length; tensor_iterator++) {
-        	inference_data_type my_output = tensor_output[tensor_iterator];
+        	inference_output_data_type my_output = tensor_output[tensor_iterator];
         	output_buffer[tensor_iterator] = my_output;
         }
     }
 }
 
 void
-inference_predict() {
+inference_tf_predict() {
 	const auto tflite_status =
 			s_interpreter->Invoke();
 	assert(tflite_status == kTfLiteOk);

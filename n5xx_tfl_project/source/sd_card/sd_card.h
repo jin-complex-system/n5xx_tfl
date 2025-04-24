@@ -34,36 +34,38 @@ sd_card_create_directory(
 /**
  * Open directory
  *
- * @param return true if successful
+ * @param directory_str
+ * @param directory_str_length
+ * @param target_directory
+ *
+ * @return true if a directory is open. False otherwise
  */
 bool
 sd_card_open_directory(
 	const char* directory_str,
-	const uint16_t directory_str_length);
-
-/**
- * Check if a directory is open
- *
- * @return true if a directory is open
- */
-bool
-sd_card_is_directory_open(void);
+	const uint16_t directory_str_length,
+	DIR* target_directory);
 
 /**
  * Close directory
+ *
+ * @param target directory
  */
 void
-sd_card_close_directory(void);
+sd_card_close_directory(
+		DIR* target_directory);
 
 /**
  * Get the next file information from opened directory
  *
- * @param FILINFO file information
+ * @param target_directory
+ * @param file information
  *
  * @return true if successful; false otherwise
  */
 bool
 sd_card_get_next_file_information(
+	DIR* target_directory,
 	FILINFO* file_information);
 
 /**

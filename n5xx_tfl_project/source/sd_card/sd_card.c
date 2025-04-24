@@ -29,14 +29,6 @@ bool
 sd_card_initialise = false;
 
 static
-bool
-sd_card_directory_open = false;
-
-static
-DIR
-current_directory;
-
-static
 void
 setup_sd_card_pins(void) {
 	/* Enables the clock for PORT1: Enables clock */
@@ -356,47 +348,42 @@ sd_card_create_directory(
 bool
 sd_card_open_directory(
 	const char* directory_str,
-	const uint16_t directory_str_length) {
+	const uint16_t directory_str_length,
+	DIR* target_directory) {
 	/// Check parameters
 	assert(sd_card_initialise);
 	assert(directory_str != NULL);
 	assert(directory_str_length > 0);
-	assert(!sd_card_directory_open);
 
-    if (f_opendir(&current_directory, directory_str)) {
+    if (f_opendir(target_directory, directory_str)) {
         PRINTF("Open directory failed.\r\n");
         return false;
     }
-    sd_card_directory_open = true;
-    return sd_card_is_directory_open();
-}
 
-bool
-sd_card_is_directory_open(void) {
-	return sd_card_directory_open;
+    return true;
 }
 
 void
-sd_card_close_directory(void) {
-	if (sd_card_is_directory_open()) {
-		f_closedir(&current_directory);
-	}
+sd_card_close_directory(
+		DIR* target_directory) {
+	assert(target_directory != NULL);
 
-	sd_card_directory_open = false;
+	f_closedir(target_directory);
 }
 
 bool
 sd_card_get_next_file_information(
+	DIR* target_directory,
 	FILINFO* file_information) {
 	FRESULT error;
 
 	/// Check parameters
 	assert(sd_card_initialise);
-	assert(sd_card_is_directory_open());
+	assert(target_directory != NULL);
 	assert(file_information != NULL);
 
 	while(true) {
-		error = f_readdir(&current_directory, file_information);
+		error = f_readdir(target_directory, file_information);
 
 	    /// Reached the end
 	    if ((error != FR_OK) || (file_information->fname[0U] == 0U)) {
@@ -431,7 +418,6 @@ sd_card_read_from_file(
 	assert(sd_card_initialise);
 	assert(target_buffer != NULL);
 	assert(max_buffer_length > 0);
-	assert(sd_card_is_directory_open());
 	assert(target_filepath_str != NULL);
 
 	/// Open the file
@@ -484,15 +470,6 @@ sd_card_write_to_file(
 	assert(filename_str_length > 0);
 	assert(directory_str != NULL);
 	assert(directory_str_length > 0);
-
-	if (sd_card_is_directory_open()) {
-
-	}
-	/// unsupported
-	else {
-		PRINTF("Need to open directory first\r\n");
-		return false;
-	}
 
     /// Create filepath
     const uint32_t filepath_length = 200u;

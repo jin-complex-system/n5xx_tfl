@@ -15,15 +15,6 @@ __BSS(RAM3)
 static APP_STATE
 current_state = APP_STATE_INIT;
 
-static constexpr
-uint16_t
-MAX_NUM_DATA = 110u;
-
-__BSS(RAM3)
-static
-uint16_t
-num_iterations = 0;
-
 __BSS(RAM3)
 static
 inference_input_data_type
@@ -43,12 +34,11 @@ OUTPUT_BUFFER[NUM_CLASSES] = {};
 const
 std::string
 INPUT_DIRECTORY = "INPUT";
-const
-std::string
-OUTPUT_FILENAME = "RESULTS.TXT";
+
 const
 std::string
 OUTPUT_DIRECTORY = "OUTPUT";
+
 constexpr
 bool
 OVERWRITE_FILE_IS_OKAY = true;
@@ -75,15 +65,7 @@ NUM_CHARS_PER_LINE = EXPECTED_INPUT_FILENAME_LENGTH + 20;
 __BSS(RAM3)
 static
 std::string
-str_buffer(MAX_NUM_DATA * NUM_CHARS_PER_LINE, 0);
-
-__BSS(RAM3)
-uint8_t
-best_scores[MAX_NUM_DATA];
-
-__BSS(RAM3)
-uint8_t
-best_class_ids[MAX_NUM_DATA];
+str_buffer(NUM_CHARS_PER_LINE, 0);
 
 void
 app_setup() {
@@ -107,10 +89,8 @@ app_setup() {
 
 void
 app_main_loop() {
-	bool
-	sd_card_loop = false;
-	bool
-	success;
+	bool sd_card_loop = false;
+	bool success;
 
 	/// Store results
 	uint8_t
@@ -118,21 +98,32 @@ app_main_loop() {
 	uint8_t
 	best_class_id = 0;
 
+	DIR
+	read_directory;
+
 	while(true) {
 		switch(current_state) {
 		case APP_STATE_CHECK_BUTTON:
 		{
 	    	if (check_button_result() > 0) {
-	    		num_iterations = 0;
-
 	    		// TODO: Move SD card insertion checking here
 
 	            /// Open input directory
 	            success = sd_card_open_directory(
 	        		INPUT_DIRECTORY.data(),
-	        		INPUT_DIRECTORY.length()
-	        	);
+	        		INPUT_DIRECTORY.length(),
+					&read_directory);
 	            assert(success);
+	            PRINTF("Opened input directory\r\n");
+
+			    success =
+			    sd_card_create_directory(
+						OUTPUT_DIRECTORY.data(),
+						OUTPUT_DIRECTORY.length(),
+						true
+				);
+			    assert(success);
+			    PRINTF("Created output directory\r\n");
 
 	            sd_card_loop = true;
 	    		toggle_blue_led();
@@ -160,10 +151,14 @@ app_main_loop() {
 		{
 			assert(sd_card_loop);
 
-			success = sd_card_get_next_file_information(&current_file_info);
-			if (!success || num_iterations >= MAX_NUM_DATA) {
-				sd_card_close_directory();
-				current_state = APP_STATE_SAVE_SD_CARD;
+			success = sd_card_get_next_file_information(
+					&read_directory,
+					&current_file_info);
+			if (!success) {
+				sd_card_close_directory(&read_directory);
+				current_state = APP_STATE_CHECK_BUTTON;
+				PRINTF("End of directory");
+				sd_card_loop = false;
 			}
 			else {
 				/// Craft filepath to file
@@ -185,68 +180,8 @@ app_main_loop() {
 						input_buffer_length > 0 &&
 						input_buffer_length <= INFERENCE_INPUT_ARRAY_LENGTH * sizeof(inference_input_data_type));
 
-				/// Copy over filename to str_buffer
-	    		char* new_line_ptr = str_buffer.data() + num_iterations * NUM_CHARS_PER_LINE;
-				sprintf(
-					new_line_ptr,
-					"%s",
-					current_file_info.fname);
 				current_state = APP_STATE_INFERENCE;
 			}
-			break;
-		}
-		case APP_STATE_SAVE_SD_CARD:
-		{
-			assert(sd_card_loop);
-
-		    success =
-		    sd_card_create_directory(
-					OUTPUT_DIRECTORY.data(),
-					OUTPUT_DIRECTORY.length(),
-					true
-			);
-		    assert(success);
-		    PRINTF("Created output directory\r\n");
-
-	    	/// Store formatted results into a buffer
-	    	/// TODO: Add filename/ID as part of results
-	    	for (uint32_t iterator = 0; iterator < num_iterations; iterator++) {
-	    		char* new_line_ptr = str_buffer.data() + iterator * NUM_CHARS_PER_LINE + EXPECTED_INPUT_FILENAME_LENGTH;
-
-				sprintf(
-						new_line_ptr,
-						" id=%u score=%u\r\n",
-						best_class_ids[iterator],
-						best_scores[iterator]);
-	    	}
-
-	    	success =
-			sd_card_open_directory(
-				OUTPUT_DIRECTORY.data(),
-				OUTPUT_DIRECTORY.length()
-			);
-	    	assert(success);
-
-	    	/// Export results to SD card
-	    	success =
-	    	sd_card_write_to_file(
-				OUTPUT_FILENAME.data(),
-				OUTPUT_FILENAME.length(),
-				OUTPUT_DIRECTORY.data(),
-				OUTPUT_DIRECTORY.length(),
-				str_buffer.data(),
-				str_buffer.length(),
-				OVERWRITE_FILE_IS_OKAY
-			);
-	    	assert(success);
-	    	sd_card_close_directory();
-
-	    	/// Toggle blue LED
-	    	toggle_blue_led();
-
-			sd_card_loop = false;
-			PRINTF("Done writing to SD card\r\n");
-			current_state = APP_STATE_CHECK_BUTTON;
 			break;
 		}
 		case APP_STATE_INFERENCE:
@@ -276,19 +211,46 @@ app_main_loop() {
 				}
 			}
 			assert(best_score >= 0 && best_class_id < NUM_CLASSES);
-
-			best_class_ids[num_iterations] = best_class_id;
-			best_scores[num_iterations] = best_score;
-
 			PRINTF(
 					"id=%u score=%u\r\n",
 					best_class_id,
 					best_score);
 
 			if (sd_card_loop) {
-				num_iterations++;
+				current_state = APP_STATE_SAVE_SD_CARD;
 			}
+			else {
+				current_state = APP_STATE_CHECK_BUTTON;
+			}
+			break;
+		}
+		case APP_STATE_SAVE_SD_CARD:
+		{
+			assert(sd_card_loop);
 
+	    	/// Store formatted results into a buffer
+			sprintf(
+					str_buffer.data(),
+					"id=%u score=%u\r\n",
+					best_class_id,
+					best_score);
+
+	    	/// Export results to SD card
+	    	success =
+	    	sd_card_write_to_file(
+				current_file_info.fname,
+				strlen(current_file_info.fname),
+				OUTPUT_DIRECTORY.data(),
+				OUTPUT_DIRECTORY.length(),
+				str_buffer.data(),
+				str_buffer.length(),
+				OVERWRITE_FILE_IS_OKAY
+			);
+	    	assert(success);
+
+	    	/// Toggle blue LED
+	    	toggle_blue_led();
+			PRINTF("Done writing to SD card\r\n");
 			current_state = APP_STATE_CHECK_BUTTON;
 			break;
 		}

@@ -4,8 +4,8 @@
 #include <cstdint>
 #include "inference_definitions.h"
 
-#define CNN_MODEL_NO_NEUTRON 1
-//#define CNN_MODEL_NEUTRON 1
+//#define CNN_MODEL_NO_NEUTRON 1
+#define CNN_MODEL_NEUTRON 1
 //#define DTFT_MODEL_NO_NEUTRON 1
 //#define DTFT_MODEL_NEUTRON 1
 

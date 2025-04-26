@@ -16,6 +16,14 @@
 #include "models/DTFT_model_neutron.h"
 #endif // DTFT_MODEL_NEUTRON
 
+#ifdef DTFT_SAC_NO_NEUTRON
+#include "models/DTFT_SAC.h"
+#endif // DTFT_SAC_NO_NEUTRON
+
+#ifdef DTFT_SAC_NEUTRON
+#include "models/DTFT_SAC_neutron.h"
+#endif // DTFT_SAC_NEUTRON
+
 #include <cassert>
 #include <tensorflow/lite/micro/kernels/micro_ops.h>
 #include <tensorflow/lite/micro/micro_interpreter.h>
@@ -66,6 +74,18 @@ s_microOpResolver;
 #ifdef DTFT_MODEL_NEUTRON
 static
 tflite::MicroMutableOpResolver<10>
+s_microOpResolver;
+#endif // DTFT_MODEL_NEUTRON
+
+#ifdef DTFT_SAC_NO_NEUTRON
+static
+tflite::MicroMutableOpResolver<19>
+s_microOpResolver;
+#endif // DTFT_MODEL_NO_NEUTRON
+
+#ifdef DTFT_SAC_NEUTRON
+static
+tflite::MicroMutableOpResolver<11>
 s_microOpResolver;
 #endif // DTFT_MODEL_NEUTRON
 
@@ -123,6 +143,43 @@ model_GetOpsResolver(void) {
 	s_microOpResolver.AddSoftmax();
 	s_microOpResolver.AddCustom(tflite::GetString_NEUTRON_GRAPH(), tflite::Register_NEUTRON_GRAPH());
 #endif // DTFT_MODEL_NEUTRON
+
+#ifdef DTFT_SAC_NO_NEUTRON
+	s_microOpResolver.AddQuantize();
+	s_microOpResolver.AddShape();
+	s_microOpResolver.AddStridedSlice();
+	s_microOpResolver.AddPack();
+	s_microOpResolver.AddReshape();
+	s_microOpResolver.AddGather();
+//	s_microOpResolver.AddReduceProd(); // Does not exist
+	s_microOpResolver.AddReduceMax();
+	s_microOpResolver.AddTranspose();
+	s_microOpResolver.AddConcatenation();
+	s_microOpResolver.AddFullyConnected();
+	s_microOpResolver.AddAdd();
+	s_microOpResolver.AddMean();
+	s_microOpResolver.AddSquaredDifference();
+	s_microOpResolver.AddRsqrt();
+	s_microOpResolver.AddMul();
+	s_microOpResolver.AddSub();
+	s_microOpResolver.AddBatchMatMul();
+	s_microOpResolver.AddSoftmax();
+	s_microOpResolver.AddLogistic();
+#endif // DTFT_SAC_NO_NEUTRON
+
+#ifdef DTFT_SAC_NEUTRON
+	s_microOpResolver.AddQuantize();
+	s_microOpResolver.AddReshape();
+	s_microOpResolver.AddTranspose();
+	s_microOpResolver.AddMean();
+	s_microOpResolver.AddSquaredDifference();
+	s_microOpResolver.AddAdd();
+	s_microOpResolver.AddRsqrt();
+	s_microOpResolver.AddMul();
+	s_microOpResolver.AddSoftmax();
+	s_microOpResolver.AddLogistic();
+	s_microOpResolver.AddCustom(tflite::GetString_NEUTRON_GRAPH(), tflite::Register_NEUTRON_GRAPH());
+#endif // DTFT_SAC_NEUTRON
 }
 
 void

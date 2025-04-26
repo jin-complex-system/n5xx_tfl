@@ -105,7 +105,7 @@ app_main_loop() {
 		switch(current_state) {
 		case APP_STATE_CHECK_BUTTON:
 		{
-	    	if (check_button_result() > 0) {
+	    	if (check_button_result() > 0 && !sd_card_loop) {
 	    		// TODO: Move SD card insertion checking here
 
 	            /// Open input directory

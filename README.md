@@ -38,6 +38,11 @@ This project is intended to test the conversion step of TensorFlow models on the
 8. Copy over files from [`_copy_to_locations`](copy_to_locations) to various driver locations:
    - Copy [`_copy_to_locations/ffconf.h`](_copy_to_locations/ffconf.h) into `fatfs/source/`
    - Copy [`_copy_to_locations/ffconf_gen.h`](`_copy_to_locations/ffconf_gen.h`) into `sdmmc/template/usdhc`
+9. Modify line `232` in`<project_name>/fatfs/source/ff.h` to expand filenames:
+```C
+// BYTE	fn[12];			/* SFN (in/out) {body[8],ext[3],status[1]} */
+BYTE	fn[25];			/* SFN (in/out) {body[21],ext[3],status[1]} */
+```
 
 # How to Test New TensorFlow Lite Models
 1. Convert your TensorFlow models (`.h5`) using eIQ Portal and command line

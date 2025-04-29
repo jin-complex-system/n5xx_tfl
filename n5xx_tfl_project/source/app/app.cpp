@@ -250,7 +250,7 @@ app_main_loop() {
 
 	    	/// Toggle blue LED
 	    	toggle_blue_led();
-			PRINTF("Done writing to SD card\r\n");
+//			PRINTF("Done writing to SD card\r\n");
 			current_state = APP_STATE_CHECK_BUTTON;
 			break;
 		}

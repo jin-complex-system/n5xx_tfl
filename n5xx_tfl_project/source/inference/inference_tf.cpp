@@ -1,11 +1,11 @@
 #include <inference/inference_tf.h>
 
 #ifdef CNN_MODEL_NO_NEUTRON
-#include "models/CNN_model.h"
+#include "models/CNN_litert.h"
 #endif // CNN_MODEL_NO_NEUTRON
 
 #ifdef CNN_MODEL_NEUTRON
-#include "models/CNN_model_neutron.h"
+#include "models/CNN_litert_neutron.h"
 #endif // CNN_MODEL_NEUTRON
 
 #ifdef DTFT_MODEL_NO_NEUTRON

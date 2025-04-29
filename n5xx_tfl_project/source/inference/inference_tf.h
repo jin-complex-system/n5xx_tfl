@@ -10,6 +10,10 @@
 //#define DTFT_MODEL_NEUTRON 1
 //#define DTFT_SAC_NO_NEUTRON 1
 //#define DTFT_SAC_NEUTRON 1
+//#define FT_MODEL_NO_NEUTRON 1
+//#define FT_MODEL_NEUTRON 1
+//#define TFT_MODEL_NO_NEUTRON 1
+//#define TFT_MODEL_NEUTRON 1
 
 /**
  * Setup inference using TensorFlow

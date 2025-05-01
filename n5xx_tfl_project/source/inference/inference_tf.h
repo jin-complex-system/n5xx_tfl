@@ -4,16 +4,21 @@
 #include <cstdint>
 #include "inference_definitions.h"
 
+#ifdef USE_QUANTIZED_MODELS
 //#define CNN_MODEL_NO_NEUTRON 1
-#define CNN_MODEL_NEUTRON 1
+//#define CNN_MODEL_NEUTRON 1
 //#define DTFT_MODEL_NO_NEUTRON 1
 //#define DTFT_MODEL_NEUTRON 1
 //#define DTFT_SAC_NO_NEUTRON 1
 //#define DTFT_SAC_NEUTRON 1
 //#define FT_MODEL_NO_NEUTRON 1
-//#define FT_MODEL_NEUTRON 1
+#define FT_MODEL_NEUTRON 1
 //#define TFT_MODEL_NO_NEUTRON 1
 //#define TFT_MODEL_NEUTRON 1
+#else
+//#define DTFT_MODEL_FLOAT_NO_NEUTRON 1
+//#define DTFT_MODEL_FLOAT_NEUTRON 1
+#endif // USE_QUANTIZED_MODELS
 
 /**
  * Setup inference using TensorFlow

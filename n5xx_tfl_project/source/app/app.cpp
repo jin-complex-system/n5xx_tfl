@@ -93,8 +93,9 @@ app_main_loop() {
 	bool success;
 
 	/// Store results
-	uint8_t
-	best_score = 0;
+
+	inference_output_data_type
+	best_score = (inference_output_data_type)0;
 	uint8_t
 	best_class_id = 0;
 
@@ -211,10 +212,23 @@ app_main_loop() {
 				}
 			}
 			assert(best_score >= 0 && best_class_id < NUM_CLASSES);
-			PRINTF(
+
+	    	/// Store formatted results into a string buffer buffer
+#ifdef USE_QUANTIZED_MODELS
+			sprintf(
+					str_buffer.data(),
 					"id=%u score=%u\r\n",
 					best_class_id,
 					best_score);
+#else
+			sprintf(
+					str_buffer.data(),
+					"id=%u score=%u\r\n",
+					best_class_id,
+					(uint16_t)(best_score * 100.0f));
+#endif // USE_QUANTIZED_MODELS
+
+			PRINTF(str_buffer.data());
 
 			if (sd_card_loop) {
 				current_state = APP_STATE_SAVE_SD_CARD;
@@ -227,13 +241,6 @@ app_main_loop() {
 		case APP_STATE_SAVE_SD_CARD:
 		{
 			assert(sd_card_loop);
-
-	    	/// Store formatted results into a buffer
-			sprintf(
-					str_buffer.data(),
-					"id=%u score=%u\r\n",
-					best_class_id,
-					best_score);
 
 	    	/// Export results to SD card
 	    	success =

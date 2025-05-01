@@ -89,9 +89,9 @@ static inline
 void
 model_GetOpsResolver(void) {
 	s_microOpResolver.AddQuantize();
-	s_microOpResolver.AddTranspose();
 	s_microOpResolver.AddMean();
 	s_microOpResolver.AddSquaredDifference();
+	s_microOpResolver.AddTranspose();
 	s_microOpResolver.AddAdd();
 	s_microOpResolver.AddRsqrt();
 	s_microOpResolver.AddMul();
@@ -271,6 +271,60 @@ model_GetOpsResolver(void) {
 }
 
 #endif // FT_MODEL_NEUTRON
+
+#ifdef DTFT_MODEL_FLOAT_NO_NEUTRON
+#include "models/DTFT_reduced_params_float.h"
+
+static
+tflite::MicroMutableOpResolver<13>
+s_microOpResolver;
+
+static inline
+void
+model_GetOpsResolver(void) {
+	s_microOpResolver.AddFullyConnected();
+	s_microOpResolver.AddTranspose();
+	s_microOpResolver.AddAdd();
+	s_microOpResolver.AddMean();
+	s_microOpResolver.AddSquaredDifference();
+	s_microOpResolver.AddRsqrt();
+	s_microOpResolver.AddMul();
+	s_microOpResolver.AddSub();
+	s_microOpResolver.AddReshape();
+	s_microOpResolver.AddBatchMatMul();
+	s_microOpResolver.AddSoftmax();
+	s_microOpResolver.AddConv2D();
+	s_microOpResolver.AddConcatenation();
+}
+
+#endif // DTFT_MODEL_FLOAT_NO_NEUTRON
+
+#ifdef DTFT_MODEL_FLOAT_NEUTRON
+#include "models/DTFT_reduced_params_neutron_float.h"
+
+static
+tflite::MicroMutableOpResolver<13>
+s_microOpResolver;
+
+static inline
+void
+model_GetOpsResolver(void) {
+	s_microOpResolver.AddFullyConnected();
+	s_microOpResolver.AddTranspose();
+	s_microOpResolver.AddAdd();
+	s_microOpResolver.AddMean();
+	s_microOpResolver.AddSquaredDifference();
+	s_microOpResolver.AddRsqrt();
+	s_microOpResolver.AddMul();
+	s_microOpResolver.AddSub();
+	s_microOpResolver.AddReshape();
+	s_microOpResolver.AddBatchMatMul();
+	s_microOpResolver.AddSoftmax();
+	s_microOpResolver.AddConv2D();
+	s_microOpResolver.AddConcatenation();
+}
+
+#endif // DTFT_MODEL_FLOAT_NEUTRON
 
 static const
 tflite::Model*

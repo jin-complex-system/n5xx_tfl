@@ -6,6 +6,7 @@
 #include <tensorflow/lite/schema/schema_generated.h>
 #include <tensorflow/lite/micro/micro_mutable_op_resolver.h>
 #include <tensorflow/lite/micro/kernels/neutron/neutron.h>
+#include "fsl_debug_console.h"
 
 #ifdef CNN_MODEL_NO_NEUTRON
 #include "models/CNN_litert.h"
@@ -369,6 +370,9 @@ inference_tf_setup(void) {
     const TfLiteStatus allocate_status =
     		s_interpreter->AllocateTensors();
     assert(allocate_status == kTfLiteOk);
+
+    const auto num_bytes_used = s_interpreter->arena_used_bytes();
+    PRINTF("Number of bytes actually used for %s: %lu\r\n", MODEL_NAME, (uint32_t)num_bytes_used);
 }
 
 void
@@ -400,6 +404,9 @@ inference_tf_set_input(
 	}
 	else if (EXPECTED_INPUT_DATA_TYPE == kTfLiteFloat32) {
 		tensor_input = (inference_input_data_type *)inputTensor->data.f;
+	}
+	else if (EXPECTED_INPUT_DATA_TYPE == kTfLiteInt8) {
+		tensor_input = (inference_input_data_type *)inputTensor->data.int8;
 	}
 	assert(tensor_input != nullptr);
 
@@ -441,6 +448,9 @@ inference_tf_get_output(
 	}
 	else if (EXPECTED_OUTPUT_DATA_TYPE == kTfLiteFloat32) {
 		tensor_output = (inference_output_data_type *)outputtTensor->data.f;
+	}
+	else if (EXPECTED_OUTPUT_DATA_TYPE == kTfLiteInt8) {
+		tensor_output = (inference_input_data_type *)outputtTensor->data.int8;
 	}
 	assert(tensor_output != nullptr);
 

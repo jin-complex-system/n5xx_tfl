@@ -53,3 +53,29 @@ BYTE	fn[25];			/* SFN (in/out) {body[21],ext[3],status[1]} */
     - Copy over the relevant operators for TFLite micro from your model header file into `model_GetOpsResolver()`
 4. If necessary, update `input.h`
 5. Run the application and observe the output buffer
+
+# Special Case: Running Transformers with NPU
+At the moment, converting transformers using TensorFlow Lite then targetting NPU does not work; SoftMax layer input always remains unsigned integer despite different efforts.
+
+If there is a need to debug transformers, change the following code to remove the asserts:
+1. Navigate to [softmax_common.cpp](n5xx_tfl_project/eiq/tensorflow-lite/tensorflow/lite/micro/kernels/softmax_common.cpp)
+2. Comment out line 52:
+```C++
+  } else {
+    // TF_LITE_ENSURE_EQ(context, input->type, output->type);
+  }
+```
+3. Change lines 101 - 109:
+```C++
+      }
+      else if (output->type == kTfLiteUInt8) {
+	    TF_LITE_ENSURE_TYPES_EQ(context, output->type, kTfLiteUInt8);
+	    TF_LITE_ENSURE_EQ(context, output->params.zero_point, 0);
+      }
+      else {  // output->type == kTfLiteint8
+    	TF_LITE_ENSURE_TYPES_EQ(context, output->type, kTfLiteInt8);
+        TF_LITE_ENSURE_EQ(context, output->params.zero_point, -128);
+        TF_LITE_ENSURE(context, output->params.scale == 1.f / 256);
+```
+
+Note that doing the above will hang the core with running NPU.

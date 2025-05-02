@@ -48,21 +48,14 @@ model_GetOpsResolver(void) {
 #include "models/DTFT_litert.h"
 
 static
-tflite::MicroMutableOpResolver<20>
+tflite::MicroMutableOpResolver<14>
 s_microOpResolver;
 
 static inline
 void
 model_GetOpsResolver(void) {
 	s_microOpResolver.AddQuantize();
-	s_microOpResolver.AddShape();
-	s_microOpResolver.AddStridedSlice();
-	s_microOpResolver.AddPack();
-	s_microOpResolver.AddReshape();
-	s_microOpResolver.AddGather();
-//	s_microOpResolver.AddReduceProd(); // Does not exist
 	s_microOpResolver.AddTranspose();
-	s_microOpResolver.AddConcatenation();
 	s_microOpResolver.AddFullyConnected();
 	s_microOpResolver.AddAdd();
 	s_microOpResolver.AddMean();
@@ -70,10 +63,11 @@ model_GetOpsResolver(void) {
 	s_microOpResolver.AddRsqrt();
 	s_microOpResolver.AddMul();
 	s_microOpResolver.AddSub();
+	s_microOpResolver.AddReshape();
 	s_microOpResolver.AddBatchMatMul();
 	s_microOpResolver.AddSoftmax();
-	s_microOpResolver.AddExpandDims();
 	s_microOpResolver.AddConv2D();
+	s_microOpResolver.AddConcatenation();
 }
 
 #endif // DTFT_MODEL_NO_NEUTRON
@@ -90,9 +84,9 @@ static inline
 void
 model_GetOpsResolver(void) {
 	s_microOpResolver.AddQuantize();
+	s_microOpResolver.AddTranspose();
 	s_microOpResolver.AddMean();
 	s_microOpResolver.AddSquaredDifference();
-	s_microOpResolver.AddTranspose();
 	s_microOpResolver.AddAdd();
 	s_microOpResolver.AddRsqrt();
 	s_microOpResolver.AddMul();
@@ -106,21 +100,14 @@ model_GetOpsResolver(void) {
 #include "models/DTFT_SAC.h"
 
 static
-tflite::MicroMutableOpResolver<19>
+tflite::MicroMutableOpResolver<13>
 s_microOpResolver;
 
 static inline
 void
 model_GetOpsResolver(void) {
-	s_microOpResolver.AddQuantize();
-	s_microOpResolver.AddShape();
-	s_microOpResolver.AddStridedSlice();
-	s_microOpResolver.AddPack();
 	s_microOpResolver.AddReshape();
-	s_microOpResolver.AddGather();
-//	s_microOpResolver.AddReduceProd(); // Does not Exist
 	s_microOpResolver.AddTranspose();
-	s_microOpResolver.AddConcatenation();
 	s_microOpResolver.AddFullyConnected();
 	s_microOpResolver.AddAdd();
 	s_microOpResolver.AddMean();
@@ -130,6 +117,7 @@ model_GetOpsResolver(void) {
 	s_microOpResolver.AddSub();
 	s_microOpResolver.AddBatchMatMul();
 	s_microOpResolver.AddSoftmax();
+	s_microOpResolver.AddConcatenation();
 	s_microOpResolver.AddLogistic();
 }
 
@@ -139,13 +127,12 @@ model_GetOpsResolver(void) {
 #include "models/DTFT_SAC_neutron.h"
 
 static
-tflite::MicroMutableOpResolver<11>
+tflite::MicroMutableOpResolver<10>
 s_microOpResolver;
 
 static inline
 void
 model_GetOpsResolver(void) {
-	s_microOpResolver.AddQuantize();
 	s_microOpResolver.AddReshape();
 	s_microOpResolver.AddTranspose();
 	s_microOpResolver.AddMean();
@@ -430,7 +417,19 @@ inference_tf_get_output(
 	}
 
 	assert(s_interpreter != nullptr);
-    TfLiteTensor* outputtTensor = s_interpreter->output(0);
+
+	TfLiteTensor* outputtTensor;
+	outputtTensor = s_interpreter->output(0);
+
+#ifdef DTFT_SAC_NO_NEUTRON
+	outputtTensor = s_interpreter->output(1);
+#endif
+
+#ifdef DTFT_SAC_NEUTRON
+	outputtTensor = s_interpreter->output(1);
+#endif
+
+
     assert(outputtTensor != nullptr);
     assert(outputtTensor->type == EXPECTED_OUTPUT_DATA_TYPE);
 

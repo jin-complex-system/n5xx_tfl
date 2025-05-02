@@ -11,13 +11,13 @@
 #define USE_QUANTIZED_MODELS 1
 #ifdef USE_QUANTIZED_MODELS
 
-typedef uint8_t inference_input_data_type;
-typedef uint8_t inference_output_data_type;
+typedef int8_t inference_input_data_type;
+typedef int8_t inference_output_data_type;
 
 constexpr TfLiteType
-EXPECTED_INPUT_DATA_TYPE = kTfLiteUInt8;
+EXPECTED_INPUT_DATA_TYPE = kTfLiteInt8;
 constexpr TfLiteType
-EXPECTED_OUTPUT_DATA_TYPE = kTfLiteUInt8;
+EXPECTED_OUTPUT_DATA_TYPE = kTfLiteInt8;
 
 #else
 

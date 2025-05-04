@@ -45,7 +45,7 @@ model_GetOpsResolver(void) {
 #endif // CNN_MODEL_NEUTRON
 
 #ifdef DTFT_MODEL_NO_NEUTRON
-#include "models/DTFT_litert.h"
+#include "models/DTFT.h"
 
 static
 tflite::MicroMutableOpResolver<14>
@@ -74,7 +74,7 @@ model_GetOpsResolver(void) {
 
 
 #ifdef DTFT_MODEL_NEUTRON
-#include "models/DTFT_litert_neutron.h"
+#include "models/DTFT_neutron.h"
 
 static
 tflite::MicroMutableOpResolver<9>
@@ -148,7 +148,7 @@ model_GetOpsResolver(void) {
 #endif // DTFT_SAC_NEUTRON
 
 #ifdef FT_MODEL_NO_NEUTRON
-#include "models/FT_litert.h"
+#include "models/FT.h"
 
 static
 tflite::MicroMutableOpResolver<20>
@@ -182,7 +182,7 @@ model_GetOpsResolver(void) {
 #endif // FT_MODEL_NO_NEUTRON
 
 #ifdef FT_MODEL_NEUTRON
-#include "models/FT_litert_neutron.h"
+#include "models/FT_neutron.h"
 
 static
 tflite::MicroMutableOpResolver<9>
@@ -205,7 +205,7 @@ model_GetOpsResolver(void) {
 #endif // FT_MODEL_NEUTRON
 
 #ifdef TFT_MODEL_NO_NEUTRON
-#include "models/TFT_litert.h"
+#include "models/TFT.h"
 
 static
 tflite::MicroMutableOpResolver<19>
@@ -238,7 +238,7 @@ model_GetOpsResolver(void) {
 #endif // TFT_MODEL_NO_NEUTRON
 
 #ifdef TFT_MODEL_NEUTRON
-#include "models/TFT_litert_neutron.h"
+#include "models/TFT_neutron.h"
 
 static
 tflite::MicroMutableOpResolver<9>

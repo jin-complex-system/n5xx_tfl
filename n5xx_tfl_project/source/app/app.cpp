@@ -93,7 +93,6 @@ app_main_loop() {
 	bool success;
 
 	/// Store results
-
 	inference_output_data_type
 	best_score = (inference_output_data_type)0;
 	uint8_t
@@ -102,11 +101,17 @@ app_main_loop() {
 	DIR
 	read_directory;
 
+	bool read_sd_card_on_start_up = true;
+
 	while(true) {
 		switch(current_state) {
 		case APP_STATE_CHECK_BUTTON:
 		{
-	    	if (check_button_result() > 0 && !sd_card_loop) {
+	    	if (
+	    			read_sd_card_on_start_up ||
+					(check_button_result() > 0 && !sd_card_loop)) {
+	    		read_sd_card_on_start_up = false;
+
 	    		// TODO: Move SD card insertion checking here
 
 	            /// Open input directory

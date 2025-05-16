@@ -8,6 +8,9 @@
 #include <tensorflow/lite/micro/kernels/neutron/neutron.h>
 #include "fsl_debug_console.h"
 
+// Add an include to the recording API:
+#include <tensorflow/lite/micro/recording_micro_interpreter.h>
+
 #ifdef CNN_MODEL_NO_NEUTRON
 #include "models/CNN_litert.h"
 
@@ -344,6 +347,34 @@ inference_tf_setup(void) {
     /// This relies on a complete list of all the ops needed by this graph.
     /// NOLINTNEXTLINE(runtime-global-variables)
     model_GetOpsResolver();
+
+    /// Build a recording interpreter
+    /// RecordingMicro interpreter can help deterine the actual memory
+    /// needed for runtime
+    {
+        static tflite::RecordingMicroInterpreter record_interpreter(
+        		s_model,
+    			s_microOpResolver,
+    			s_tensorArena,
+    			kTensorArenaSize,
+    			nullptr);
+        PRINTF("Recording state of model at runtime\r\n");
+        if (record_interpreter.Invoke() != kTfLiteOk) {
+          PRINTF("Something went wrong with invoking interpreter for recording\r\n");
+        }
+        /// Print out detailed allocation information:
+        else {
+
+        	const auto microallocator =
+        			record_interpreter.GetMicroAllocator();
+
+        	/// Actual buffer needed for inference
+			microallocator.PrintAllocations();
+        	PRINTF(
+        			"Actual buffer needed: %d bytes\r\n",
+					microallocator.GetSimpleMemoryAllocator()->GetUsedBytes());
+        }
+    }
 
     /// Build an interpreter to run the model with.
     static tflite::MicroInterpreter static_interpreter(
